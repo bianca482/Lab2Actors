@@ -23,8 +23,8 @@ import java.util.Optional;
 AC (Air Conditioning) regulates the AC depending on the measured temperature.
 ------------------------------------------
 Rules:
-If the temperature is above 20°C the AC starts cooling.
-If the temperature is below 20°C the AC turns off.
+If the temperature is above 20°C the AC starts cooling. DONE
+If the temperature is below 20°C the AC turns off. DONE
  */
 public class AirCondition extends AbstractBehavior<AirCondition.AirConditionCommand> {
     public interface AirConditionCommand {}
@@ -38,12 +38,10 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     public static final class EnrichedTemperature implements AirConditionCommand {
-        Optional<Double> value;
-        Optional<String> unit;
+        Temperature temperature;
 
-        public EnrichedTemperature(Optional<Double> value, Optional<String> unit) {
-            this.value = value;
-            this.unit = unit;
+        public EnrichedTemperature(Temperature temperature) {
+            this.temperature = temperature;
         }
     }
 
@@ -73,9 +71,9 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private Behavior<AirConditionCommand> onReadTemperature(EnrichedTemperature r) {
-        getContext().getLog().info("Aircondition reading {}", r.value.get());
-        // TODO: process temperature
-        if(r.value.get() >= 15) {
+        getContext().getLog().info("Aircondition reading {}", r.temperature.getValue());
+        // TODO: evtl. process temperature
+        if (r.temperature.getValue() >= 20) {
             getContext().getLog().info("Aircondition actived");
             this.active = true;
         }
@@ -90,7 +88,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private Behavior<AirConditionCommand> onPowerAirConditionOff(PowerAirCondition r) {
         getContext().getLog().info("Turning Aircondition to {}", r.value);
 
-        if(r.value.get() == false) {
+        if (r.value.get() == false) {
             return this.powerOff();
         }
         return this;
@@ -99,7 +97,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private Behavior<AirConditionCommand> onPowerAirConditionOn(PowerAirCondition r) {
         getContext().getLog().info("Turning Aircondition to {}", r.value);
 
-        if(r.value.get() == true) {
+        if (r.value.get() == true) {
             return Behaviors.receive(AirConditionCommand.class)
                     .onMessage(EnrichedTemperature.class, this::onReadTemperature)
                     .onMessage(PowerAirCondition.class, this::onPowerAirConditionOff)

@@ -14,18 +14,18 @@ import java.util.Optional;
 Temperature Sensor measures the environmental temperature and wraps it in a custom datatype including a unit.
 --------------------------------------------
 Rules:
-If the temperature is above 20°C the AC starts cooling.
-If the temperature is below 20°C the AC turns off.
+If the temperature is above 20°C the AC starts cooling. DONE
+If the temperature is below 20°C the AC turns off. DONE
  */
 public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.TemperatureCommand> {
 
     public interface TemperatureCommand {}
 
     public static final class ReadTemperature implements TemperatureCommand {
-        final Optional<Double> value;
+        final Temperature temperature;
 
-        public ReadTemperature(Optional<Double> value) {
-            this.value = value;
+        public ReadTemperature(Temperature temperature) {
+            this.temperature = temperature;
         }
     }
 
@@ -55,8 +55,8 @@ public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.Temper
     }
 
     private Behavior<TemperatureCommand> onReadTemperature(ReadTemperature r) {
-        getContext().getLog().info("TemperatureSensor received {}", r.value.get());
-        this.airCondition.tell(new AirCondition.EnrichedTemperature(r.value, Optional.of("Celsius")));
+        getContext().getLog().info("TemperatureSensor received {}", r.temperature.getValue());
+        this.airCondition.tell(new AirCondition.EnrichedTemperature(r.temperature));
         return this;
     }
 
@@ -64,5 +64,4 @@ public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.Temper
         getContext().getLog().info("TemperatureSensor actor {}-{} stopped", groupId, deviceId);
         return this;
     }
-
 }
