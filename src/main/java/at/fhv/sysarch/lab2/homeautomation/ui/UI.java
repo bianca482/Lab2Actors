@@ -24,7 +24,7 @@ public class UI extends AbstractBehavior<Void> {
         return Behaviors.setup(context -> new UI(context, tempSensor, airCondition));
     }
 
-    private  UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition) {
+    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition) {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
