@@ -10,6 +10,13 @@ import akka.actor.typed.javadsl.Receive;
 
 import java.util.Optional;
 
+/*
+Temperature Sensor measures the environmental temperature and wraps it in a custom datatype including a unit.
+--------------------------------------------
+Rules:
+If the temperature is above 20°C the AC starts cooling.
+If the temperature is below 20°C the AC turns off.
+ */
 public class TemperatureSensor extends AbstractBehavior<TemperatureSensor.TemperatureCommand> {
 
     public interface TemperatureCommand {}

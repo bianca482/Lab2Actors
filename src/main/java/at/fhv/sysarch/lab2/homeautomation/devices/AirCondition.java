@@ -19,6 +19,13 @@ import akka.actor.typed.javadsl.Receive;
  */
 import java.util.Optional;
 
+/*
+AC (Air Conditioning) regulates the AC depending on the measured temperature.
+------------------------------------------
+Rules:
+If the temperature is above 20°C the AC starts cooling.
+If the temperature is below 20°C the AC turns off.
+ */
 public class AirCondition extends AbstractBehavior<AirCondition.AirConditionCommand> {
     public interface AirConditionCommand {}
 
