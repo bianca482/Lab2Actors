@@ -57,21 +57,21 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
         // If the weather is sunny the blinds will close.
         if (b.weather.equals(Weather.SUNNY)) {
             isOpen = false;
-            getContext().getLog().info("Blinds reading a movie is running is {}", b.isPlayingMedia.get());
+            getContext().getLog().info("Blinds reading a movie is running is {}", b.isPlayingMedia.orElse(false));
             getContext().getLog().info("Blinds closed");
         }
         // If the weather is not sunny the blinds will open (unless a movie is playing).
         else if (b.weather.equals(Weather.CLOUDY)) {
-            // No movie is running: Open blinds
-            if (b.isPlayingMedia.get().equals(false)) {
-                isOpen = true;
-                getContext().getLog().info("Blinds reading no movie is running");
-                getContext().getLog().info("Blinds open");
             // Movie is running: Close blinds
-            } else {
+            if (b.isPlayingMedia.isPresent() && b.isPlayingMedia.get().equals(true)) {
                 isOpen = false;
                 getContext().getLog().info("Blinds reading movie is running");
                 getContext().getLog().info("Blinds closed");
+            // No movie is running: Open blinds
+            } else {
+                isOpen = true;
+                getContext().getLog().info("Blinds reading no movie is running");
+                getContext().getLog().info("Blinds open");
             }
         }
         // If a movie is playing the blinds are closed.
