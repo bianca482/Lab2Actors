@@ -17,18 +17,20 @@ public class UI extends AbstractBehavior<Void> {
 
     private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
     private ActorRef<AirCondition.AirConditionCommand> airCondition;
+    private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
     private ActorRef<Blinds.BlindsCommand> blinds;
 
-    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<Blinds.BlindsCommand> blinds) {
-        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, blinds));
+    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds) {
+        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds));
     }
 
-    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<Blinds.BlindsCommand> blinds) {
+    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds) {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
         this.airCondition = airCondition;
         this.tempSensor = tempSensor;
+        this.weatherSensor = weatherSensor;
         this.blinds = blinds;
         new Thread(() -> { this.runCommandLine(); }).start();
 
@@ -51,7 +53,6 @@ public class UI extends AbstractBehavior<Void> {
         String[] input = null;
         String reader = "";
 
-
         while (!reader.equalsIgnoreCase("quit") && scanner.hasNextLine()) {
             reader = scanner.nextLine();
             // TODO: change input handling
@@ -62,12 +63,23 @@ public class UI extends AbstractBehavior<Void> {
             if(command[0].equals("a")) {
                 this.airCondition.tell(new AirCondition.PowerAirCondition(Optional.of(Boolean.valueOf(command[1]))));
             }
+            if(command[0].equals("w")) {
+                Weather weather = Weather.SUNNY;
+                if (command[1].equals("cloudy")) {
+                    weather = Weather.CLOUDY;
+                }
+                this.weatherSensor.tell(new WeatherSensor.ReadWeather(weather));
+            }
             if(command[0].equals("b")) {
                 Weather weather = Weather.SUNNY;
                 if (command[1].equals("cloudy")) {
                     weather = Weather.CLOUDY;
                 }
-                this.blinds.tell(new Blinds.ControlBlinds(weather, Optional.of(Boolean.valueOf(command[2]))));
+                boolean moviePlaying = false;
+                if (command.length == 3 && command[2].equals("true")) {
+                    moviePlaying = true;
+                }
+                this.blinds.tell(new Blinds.ControlBlinds(weather, Optional.of(Boolean.valueOf(moviePlaying))));
             }
             // TODO: process Input
         }
