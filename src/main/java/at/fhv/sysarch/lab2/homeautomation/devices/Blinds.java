@@ -19,15 +19,30 @@ If the weather is not sunny the blinds will open (unless a movie is playing).
 If a movie is playing the blinds are closed.
  */
 public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
-    public interface BlindsCommand {}
+    public interface BlindsCommand {
+    }
+
+    private static Optional<Weather> currentWeather = Optional.empty();
+    private static Optional<Boolean> playingMovie = Optional.empty();
 
     public static final class ControlBlinds implements BlindsCommand {
         Weather weather;
-        Optional<Boolean> isPlayingMedia;
+        boolean isPlayingMovie;
 
-        public ControlBlinds(Weather weather, Optional<Boolean> isPlayingMedia) {
+        public ControlBlinds(Weather weather) {
+            if (playingMovie.isPresent()){
+                isPlayingMovie = playingMovie.get();
+            }
             this.weather = weather;
-            this.isPlayingMedia = isPlayingMedia;
+            currentWeather = Optional.of(weather);
+        }
+
+        public ControlBlinds(boolean isPlayingMovie) {
+            this.isPlayingMovie = isPlayingMovie;
+            playingMovie = Optional.of(isPlayingMovie);
+            if (currentWeather.isPresent()) {
+                this.weather = currentWeather.get();
+            }
         }
     }
 
@@ -55,27 +70,30 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
         getContext().getLog().info("Blinds reading the weather is {}", b.weather);
 
         // If the weather is sunny the blinds will close.
-        if (b.weather.equals(Weather.SUNNY)) {
-            isOpen = false;
-            getContext().getLog().info("Blinds reading a movie is running is {}", b.isPlayingMedia.orElse(false));
-            getContext().getLog().info("Blinds closed");
-        }
-        // If the weather is not sunny the blinds will open (unless a movie is playing).
-        else if (b.weather.equals(Weather.CLOUDY)) {
-            // Movie is running: Close blinds
-            if (b.isPlayingMedia.isPresent() && b.isPlayingMedia.get().equals(true)) {
+        if (b.weather != null) {
+            if (b.weather.equals(Weather.SUNNY)) {
                 isOpen = false;
-                getContext().getLog().info("Blinds reading movie is running");
+                getContext().getLog().info("Blinds reading a movie is running is {}", b.isPlayingMovie);
                 getContext().getLog().info("Blinds closed");
-            // No movie is running: Open blinds
-            } else {
-                isOpen = true;
-                getContext().getLog().info("Blinds reading no movie is running");
-                getContext().getLog().info("Blinds open");
+            }
+            // If the weather is not sunny the blinds will open (unless a movie is playing).
+            else if (b.weather.equals(Weather.CLOUDY)) {
+                // Movie is running: Close blinds
+                if (b.isPlayingMovie) {
+                    isOpen = false;
+                    getContext().getLog().info("Blinds reading movie is running");
+                    getContext().getLog().info("Blinds closed");
+                    // No movie is running: Open blinds
+                } else {
+                    isOpen = true;
+                    getContext().getLog().info("Blinds reading no movie is running");
+                    getContext().getLog().info("Blinds open");
+                }
             }
         }
+
         // If a movie is playing the blinds are closed.
-        else if (b.isPlayingMedia.get().equals(true)) {
+        else if (b.isPlayingMovie) {
             isOpen = false;
             getContext().getLog().info("Blinds closed");
         }

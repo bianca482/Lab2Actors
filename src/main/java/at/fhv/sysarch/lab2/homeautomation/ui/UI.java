@@ -1,6 +1,5 @@
 package at.fhv.sysarch.lab2.homeautomation.ui;
 
-import akka.actor.Actor;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
@@ -21,12 +20,13 @@ public class UI extends AbstractBehavior<Void> {
     private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
     private ActorRef<Blinds.BlindsCommand> blinds;
     private ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator;
+    private ActorRef<MediaStation.MediaStationCommand> mediaStation;
 
-    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator) {
-        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, weatherSimulator));
+    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation) {
+        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, weatherSimulator, mediaStation));
     }
 
-    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator) {
+    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation) {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
@@ -35,6 +35,7 @@ public class UI extends AbstractBehavior<Void> {
         this.weatherSensor = weatherSensor;
         this.blinds = blinds;
         this.weatherSimulator = weatherSimulator;
+        this.mediaStation = mediaStation;
         new Thread(() -> { this.runCommandLine(); }).start();
 
         getContext().getLog().info("UI started");
@@ -60,29 +61,21 @@ public class UI extends AbstractBehavior<Void> {
             reader = scanner.nextLine();
             // TODO: change input handling
             String[] command = reader.split(" ");
-            if(command[0].equals("t")) {
+            if (command[0].equals("t")) {
                 this.tempSensor.tell(new TemperatureSensor.ReadTemperature(new Temperature(Double.parseDouble(command[1]), Temperature.Unit.CELSIUS)));
             }
-            if(command[0].equals("a")) {
+            if (command[0].equals("a")) {
                 this.airCondition.tell(new AirCondition.PowerAirCondition(Optional.of(Boolean.valueOf(command[1]))));
             }
-            if(command[0].equals("w")) {
+            if (command[0].equals("m")) {
+                this.mediaStation.tell(new MediaStation.ReadMediaStation(Optional.of(Boolean.valueOf(command[1]))));
+            }
+            if (command[0].equals("w")) {
                 Weather weather = Weather.SUNNY;
                 if (command[1].equals("cloudy")) {
                     weather = Weather.CLOUDY;
                 }
                 this.weatherSensor.tell(new WeatherSensor.ReadWeather(weather));
-            }
-            if(command[0].equals("b")) {
-                Weather weather = Weather.SUNNY;
-                if (command[1].equals("cloudy")) {
-                    weather = Weather.CLOUDY;
-                }
-                boolean moviePlaying = false;
-                if (command.length == 3 && command[2].equals("true")) {
-                    moviePlaying = true;
-                }
-                this.blinds.tell(new Blinds.ControlBlinds(weather, Optional.of(Boolean.valueOf(moviePlaying))));
             }
             // TODO: process Input
         }
