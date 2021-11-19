@@ -1,5 +1,6 @@
 package at.fhv.sysarch.lab2.homeautomation.ui;
 
+import akka.actor.Actor;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
@@ -16,6 +17,7 @@ public class UI extends AbstractBehavior<Void> {
 
     private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
     private ActorRef<AirCondition.AirConditionCommand> airCondition;
+    private ActorRef<Blinds.BlindsCommand> blinds;
 
     public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<Blinds.BlindsCommand> blinds) {
         return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, blinds));
