@@ -7,8 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-
-import java.util.Optional;
+import at.fhv.sysarch.lab2.homeautomation.domain.Temperature;
 
 /*
 Temperature Sensor measures the environmental temperature and wraps it in a custom datatype including a unit.

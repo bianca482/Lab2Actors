@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 
 import java.util.Optional;
 
@@ -19,8 +20,7 @@ If the weather is not sunny the blinds will open (unless a movie is playing).
 If a movie is playing the blinds are closed.
  */
 public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
-    public interface BlindsCommand {
-    }
+    public interface BlindsCommand {}
 
     private static Optional<Weather> currentWeather = Optional.empty();
     private static Optional<Boolean> playingMovie = Optional.empty();
@@ -47,15 +47,20 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
     }
 
     private boolean isOpen;
+    private final String groupId;
+    private final String deviceId;
 
-    public Blinds(ActorContext<BlindsCommand> context) {
+    public Blinds(ActorContext<BlindsCommand> context, String groupId, String deviceId) {
         super(context);
-        isOpen = false;
+        this.isOpen = false;
+        this.groupId = groupId;
+        this.deviceId = deviceId;
+
         getContext().getLog().info("Blinds Actor started");
     }
 
-    public static Behavior<BlindsCommand> create(ActorRef<BlindsCommand> blinds) {
-        return Behaviors.setup(Blinds::new);
+    public static Behavior<BlindsCommand> create(String groupId, String deviceId) {
+        return Behaviors.setup(context -> new Blinds(context, groupId, deviceId));
     }
 
     @Override

@@ -6,6 +6,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.domain.Temperature;
 
 /**
  * This class shows ONE way to switch behaviors in object-oriented style. Another approach is the use of static
@@ -54,6 +55,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
+
         getContext().getLog().info("AirCondition started");
     }
 

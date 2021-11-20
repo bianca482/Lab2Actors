@@ -9,6 +9,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.*;
 import at.fhv.sysarch.lab2.homeautomation.devices.simulators.WeatherSimulator;
+import at.fhv.sysarch.lab2.homeautomation.domain.Product;
+import at.fhv.sysarch.lab2.homeautomation.domain.Temperature;
+import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 
 import java.util.Optional;
 import java.util.Scanner;
@@ -21,12 +24,13 @@ public class UI extends AbstractBehavior<Void> {
     private ActorRef<Blinds.BlindsCommand> blinds;
     private ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator;
     private ActorRef<MediaStation.MediaStationCommand> mediaStation;
+    private ActorRef<Fridge.FridgeCommand> fridge;
 
-    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation) {
-        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, weatherSimulator, mediaStation));
+    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge) {
+        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, weatherSimulator, mediaStation, fridge));
     }
 
-    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation) {
+    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge) {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
@@ -36,6 +40,7 @@ public class UI extends AbstractBehavior<Void> {
         this.blinds = blinds;
         this.weatherSimulator = weatherSimulator;
         this.mediaStation = mediaStation;
+        this.fridge = fridge;
         new Thread(() -> { this.runCommandLine(); }).start();
 
         getContext().getLog().info("UI started");
@@ -76,6 +81,28 @@ public class UI extends AbstractBehavior<Void> {
                     weather = Weather.CLOUDY;
                 }
                 this.weatherSensor.tell(new WeatherSensor.ReadWeather(weather));
+            }
+            if (command[0].equals("f")) {
+                if (command[1].equals("order")) {
+                    Product product = new Product(command[2], 10, 0.3);
+                    int amount = 1;
+                    if (command.length >= 4) {
+                        amount = Integer.parseInt(command[3]);
+                    }
+                    this.fridge.tell(new Fridge.OrderProduct(product, amount));
+                }
+                else if (command[1].equals("consume")) {
+                    Product product = new Product(command[2], 10, 0.3);
+                    int amount = 1;
+                    if (command.length >= 4) {
+                        amount = Integer.parseInt(command[3]);
+                    }
+                    this.fridge.tell(new Fridge.ConsumeProduct(product, amount));
+                } else if (command[1].equals("products")) {
+                    this.fridge.tell(new Fridge.QueryingStoredProducts());
+                } else if (command[1].equals("orders")) {
+                    this.fridge.tell(new Fridge.QueryingHistoryOfOrders());
+                }
             }
             // TODO: process Input
         }

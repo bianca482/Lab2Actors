@@ -1,5 +1,22 @@
 package at.fhv.sysarch.lab2.homeautomation.devices;
 
+import akka.actor.typed.ActorRef;
+import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
+import akka.actor.typed.javadsl.AbstractBehavior;
+import akka.actor.typed.javadsl.ActorContext;
+import akka.actor.typed.javadsl.Behaviors;
+import akka.actor.typed.javadsl.Receive;
+import at.fhv.sysarch.lab2.homeautomation.domain.Order;
+import at.fhv.sysarch.lab2.homeautomation.domain.Product;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 /*
 Fridge manages products and allows ordering new products.
 Based on the currently contained products an order might no be realizable.
@@ -22,5 +39,126 @@ The Fridge can only process an order if there is enough room in the fridge, i.e.
 The Fridge can only process an order if the weight of the sum of the contained products and newly order products does not exceed its maximum weight capacity.
 If a product runs out in the fridge it is automatically ordered again.
  */
-public class Fridge {
+public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
+    public interface FridgeCommand {}
+
+    //Users can consume products from the Fridge.
+    public static final class ConsumeProduct implements FridgeCommand {
+        Product productToConsume;
+        int amount;
+
+        public ConsumeProduct(Product productToConsume, int amount) {
+            this.productToConsume = productToConsume;
+            this.amount = amount;
+        }
+    }
+
+    //Users can order products at the Fridge.
+    public static final class OrderProduct implements FridgeCommand {
+        Product productToOrder;
+        int amount;
+
+        public OrderProduct(Product productToOrder, int amount) {
+            this.productToOrder = productToOrder;
+            this.amount = amount;
+        }
+    }
+
+    //The Fridge allows for querying the currently stored products = Abfrage der aktuell im Kühlschrank enthaltenen Produkte
+    public static final class QueryingStoredProducts implements FridgeCommand {}
+
+    //The Fridge allows for querying the history of orders = Abfrage der bisherigen Bestellungen
+    public static final class QueryingHistoryOfOrders implements FridgeCommand {}
+
+    private final int maxNumberOfProducts;
+    private final int maxWeightLoad;
+    private final String groupId;
+    private final String deviceId;
+    private Map<Product, Integer> products;
+    private List<Order> orders;
+    private double currentWeightLoad;
+    private int currentNumberOfProducts;
+
+    private Fridge(ActorContext<FridgeCommand> context, int maxNumberOfProducts, int maxWeightLoad, String groupId, String deviceId) {
+        super(context);
+        this.maxNumberOfProducts = maxNumberOfProducts;
+        this.maxWeightLoad = maxWeightLoad;
+        this.groupId = groupId;
+        this.deviceId = deviceId;
+        this.products = new HashMap<>();
+        this.orders = new LinkedList<>();
+
+        getContext().getLog().info("Fridge started");
+    }
+
+    public static Behavior<Fridge.FridgeCommand> create(int maxNumberOfProducts, int maxWeightLoad, String groupId, String deviceId) {
+        return Behaviors.setup(context -> new Fridge(context, maxNumberOfProducts, maxWeightLoad, groupId, deviceId));
+    }
+
+    @Override
+    public Receive<FridgeCommand> createReceive() {
+        return newReceiveBuilder()
+                .onMessage(ConsumeProduct.class, this::onConsumeProduct)
+                .onMessage(OrderProduct.class, this::onOrderProduct)
+                .onMessage(QueryingStoredProducts.class, this::onQueryingStoredProducts)
+                .onMessage(QueryingHistoryOfOrders.class, this::onQueryingHistoryOfOrders)
+                .onSignal(PostStop.class, signal -> onPostStop())
+                .build();
+    }
+
+    private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct message) {
+        getContext().getLog().info("Fridge received: User wants to consume {}x {}", message.amount, message.productToConsume.getName());
+        int amountOfProduct = products.get(message.productToConsume);
+        //Check if product can be consumed
+        if (amountOfProduct - message.amount >= 0) {
+            products.put(message.productToConsume, amountOfProduct - message.amount);
+            getContext().getLog().info("Successfully consumed {}", message.productToConsume.getName());
+        } else {
+            getContext().getLog().info("Cannot consume {}", message.productToConsume.getName());
+        }
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onOrderProduct(OrderProduct message) {
+        getContext().getLog().info("Fridge received: User wants to order {}x {}", message.amount, message.productToOrder.getName());
+        if ((currentWeightLoad + (message.productToOrder.getWeight() * message.amount) <= maxWeightLoad) && (currentNumberOfProducts + message.amount <= maxNumberOfProducts)) {
+            // Add product
+            if (products.containsKey(message.productToOrder)) {
+                int oldAmount = products.get(message.productToOrder);
+                products.put(message.productToOrder, oldAmount + message.amount);
+            } else {
+                products.put(message.productToOrder, message.amount);
+            }
+            // Add order
+            orders.add(new Order(message.productToOrder, message.amount));
+
+            // Adjust current weight + number of products
+            currentWeightLoad = currentWeightLoad + (message.productToOrder.getWeight() * message.amount);
+            currentNumberOfProducts = currentNumberOfProducts + message.amount;
+
+            getContext().getLog().info("Successfully ordered {}", message.productToOrder.getName());
+        } else {
+            getContext().getLog().info("Cannot order {}", message.productToOrder.getName());
+        }
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onQueryingStoredProducts(QueryingStoredProducts message) {
+        getContext().getLog().info("Fridge received QueryingStoredProducts Command");
+        System.out.println(products.entrySet());
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onQueryingHistoryOfOrders(QueryingHistoryOfOrders message) {
+        getContext().getLog().info("Fridge received QueryingHistoryOfOrders Command");
+        for (Order o : orders) {
+            System.out.println(o);
+        }
+        return this;
+    }
+
+    private Fridge onPostStop() {
+        getContext().getLog().info("Fridge actor {}--{} stopped", groupId, deviceId);
+        return this;
+    }
 }

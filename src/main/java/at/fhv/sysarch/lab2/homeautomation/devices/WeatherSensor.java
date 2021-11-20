@@ -7,8 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
-
-import java.util.Optional;
+import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 
 /*
 Weather Sensor measures the weather condition.
@@ -42,6 +41,7 @@ public class WeatherSensor extends AbstractBehavior<WeatherSensor.WeatherCommand
         this.blinds = blinds;
         this.groupId = groupId;
         this.deviceId = deviceId;
+
         getContext().getLog().info("WeatherSensor started");
     }
 
