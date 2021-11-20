@@ -1,6 +1,5 @@
 package at.fhv.sysarch.lab2.homeautomation.devices;
 
-import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -10,8 +9,6 @@ import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.domain.Order;
 import at.fhv.sysarch.lab2.homeautomation.domain.Product;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +36,9 @@ The Fridge can only process an order if there is enough room in the fridge, i.e.
 The Fridge can only process an order if the weight of the sum of the contained products and newly order products does not exceed its maximum weight capacity.
 If a product runs out in the fridge it is automatically ordered again.
  */
+// ToDo: User queries the fridge with Request-Response && User consumes a product from the fridge with Ignoring replies -> Wie sieht der User aus?
+// ToDo: User orders products -> fridge should relay this request to a separate OrderProcessor actor (Per session child Actor)
+// ToDo: Weight + Space Sensoren einbauen!
 public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand {}
 
