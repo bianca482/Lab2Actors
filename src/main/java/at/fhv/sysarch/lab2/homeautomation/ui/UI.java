@@ -17,6 +17,12 @@ import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 import java.util.Optional;
 import java.util.Scanner;
 
+
+// TODO Ist nicht für die Ausgabe zuständig (dies passiert über logging in Sensoren), ist dieser nur zuständig für User input handling?
+// liest Commandozeile und gibt es an User weiter
+// mögliche Commands: consume product, order product, play movie
+
+
 public class UI extends AbstractBehavior<Void> {
 
     private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
@@ -44,6 +50,9 @@ public class UI extends AbstractBehavior<Void> {
         this.mediaStation = mediaStation;
         this.fridge = fridge;
         this.temperatureSimulator = temperatureSimulator;
+
+        //TODO was anstatt Thread? -> laut Forum scheint dies der einzige Weg:
+        // https://discuss.lightbend.com/t/interacting-with-root-actor-through-user-console-input/6511
         new Thread(() -> { this.runCommandLine(); }).start();
 
         getContext().getLog().info("UI started");

@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.domain.Order;
 import at.fhv.sysarch.lab2.homeautomation.domain.Product;
+import at.fhv.sysarch.lab2.homeautomation.domain.Receipt;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,6 +44,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand {}
 
     //Users can consume products from the Fridge.
+    //TODO Was bedeutet konsumieren? Triggert User dem WeightSensor & SpaceSensor oder direkt den Fridge?
     public static final class ConsumeProduct implements FridgeCommand {
         Product productToConsume;
         int amount;
@@ -54,6 +56,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     }
 
     //Users can order products at the Fridge.
+    //TODO Triggert User direkt den Fridge?
     public static final class OrderProduct implements FridgeCommand {
         Product productToOrder;
         int amount;
