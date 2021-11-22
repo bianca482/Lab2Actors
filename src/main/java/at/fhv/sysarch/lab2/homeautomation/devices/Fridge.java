@@ -62,18 +62,18 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         Product productToOrder;
         int amount;
 
-//        ActorRef<OrderCompleted> respondTo;
-//
-//        public OrderProduct(Product productToOrder, int amount, ActorRef<OrderCompleted> respondTo) {
-//            this.productToOrder = productToOrder;
-//            this.amount = amount;
-//            this.respondTo = respondTo;
-//        }
+        ActorRef<FridgeCommand> respondTo;
 
-        public OrderProduct(Product productToOrder, int amount) {
+        public OrderProduct(Product productToOrder, int amount, ActorRef<FridgeCommand> respondTo) {
             this.productToOrder = productToOrder;
             this.amount = amount;
+            this.respondTo = respondTo;
         }
+//
+//        public OrderProduct(Product productToOrder, int amount) {
+//            this.productToOrder = productToOrder;
+//            this.amount = amount;
+//        }
     }
 
     //Antwort von OrderProcessor, wenn die Bestellung erfolgreich abgeschlossen wurde
