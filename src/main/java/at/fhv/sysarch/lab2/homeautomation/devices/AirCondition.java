@@ -118,7 +118,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     }
 
     private AirCondition onPostStop() {
-        getContext().getLog().info("TemperatureSensor actor {}-{} stopped", groupId, deviceId);
+        getContext().getLog().info("AirCondition actor {}-{} stopped", groupId, deviceId);
         return this;
     }
 }

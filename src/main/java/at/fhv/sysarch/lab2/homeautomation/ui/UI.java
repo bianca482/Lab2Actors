@@ -23,22 +23,24 @@ import java.util.Scanner;
 // mögliche Commands: consume product, order product, play movie
 
 
-public class UI extends AbstractBehavior<Void> {
+public class UI extends AbstractBehavior<UI.UICommand> {
 
-    private ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
-    private ActorRef<AirCondition.AirConditionCommand> airCondition;
-    private ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
-    private ActorRef<Blinds.BlindsCommand> blinds;
-    private ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator;
-    private ActorRef<MediaStation.MediaStationCommand> mediaStation;
-    private ActorRef<Fridge.FridgeCommand> fridge;
-    private ActorRef<TemperatureSimulator.TemperatureSimulatorCommand> temperatureSimulator;
+    public interface UICommand {}
 
-    public static Behavior<Void> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge, ActorRef<TemperatureSimulator.TemperatureSimulatorCommand> temperatureSimulator) {
-        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, weatherSimulator, mediaStation, fridge, temperatureSimulator));
+    public static class InitiateUI implements UICommand {}
+
+    private final ActorRef<TemperatureSensor.TemperatureCommand> tempSensor;
+    private final ActorRef<AirCondition.AirConditionCommand> airCondition;
+    private final ActorRef<WeatherSensor.WeatherCommand> weatherSensor;
+    private final ActorRef<Blinds.BlindsCommand> blinds;
+    private final ActorRef<MediaStation.MediaStationCommand> mediaStation;
+    private final ActorRef<Fridge.FridgeCommand> fridge;
+
+    public static Behavior<UICommand> create(ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge) {
+        return Behaviors.setup(context -> new UI(context, tempSensor, airCondition, weatherSensor, blinds, mediaStation, fridge));
     }
 
-    private UI(ActorContext<Void> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<WeatherSimulator.WeatherSimulatorCommand> weatherSimulator, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge, ActorRef<TemperatureSimulator.TemperatureSimulatorCommand> temperatureSimulator) {
+    private UI(ActorContext<UICommand> context, ActorRef<TemperatureSensor.TemperatureCommand> tempSensor, ActorRef<AirCondition.AirConditionCommand> airCondition, ActorRef<WeatherSensor.WeatherCommand> weatherSensor, ActorRef<Blinds.BlindsCommand> blinds, ActorRef<MediaStation.MediaStationCommand> mediaStation, ActorRef<Fridge.FridgeCommand> fridge) {
         super(context);
         // TODO: implement actor and behavior as needed
         // TODO: move UI initialization to appropriate place
@@ -46,21 +48,23 @@ public class UI extends AbstractBehavior<Void> {
         this.tempSensor = tempSensor;
         this.weatherSensor = weatherSensor;
         this.blinds = blinds;
-        this.weatherSimulator = weatherSimulator;
         this.mediaStation = mediaStation;
         this.fridge = fridge;
-        this.temperatureSimulator = temperatureSimulator;
-
-        //TODO was anstatt Thread? -> laut Forum scheint dies der einzige Weg:
-        // https://discuss.lightbend.com/t/interacting-with-root-actor-through-user-console-input/6511
-        new Thread(() -> { this.runCommandLine(); }).start();
 
         getContext().getLog().info("UI started");
     }
 
     @Override
-    public Receive<Void> createReceive() {
-        return newReceiveBuilder().onSignal(PostStop.class, signal -> onPostStop()).build();
+    public Receive<UICommand> createReceive() {
+        return newReceiveBuilder()
+                .onMessage(InitiateUI.class, this::onInitiateUI)
+                .onSignal(PostStop.class, signal -> onPostStop()).build();
+    }
+
+    private Behavior<UICommand> onInitiateUI (InitiateUI message) {
+        new Thread(this::runCommandLine).start();
+        getContext().getLog().info("UI started CommandLine");
+        return this;
     }
 
     private UI onPostStop() {

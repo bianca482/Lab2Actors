@@ -21,6 +21,7 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
     private ActorRef<MediaStation.MediaStationCommand> mediaStation;
     private ActorRef<Fridge.FridgeCommand> fridge;
     private ActorRef<TemperatureSimulator.TemperatureSimulatorCommand> temperatureSimulator;
+    private ActorRef<UI.UICommand> ui;
 
     public static Behavior<Void> create() {
         return Behaviors.setup(HomeAutomationController::new);
@@ -33,12 +34,15 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
         this.tempSensor = getContext().spawn(TemperatureSensor.create(this.airCondition, "1", "1"), "TemperatureSensor");
         this.blinds = getContext().spawn(Blinds.create("6", "1"), "Blinds");
         this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blinds, "3", "1"), "WeatherSensor");
-        //this.weatherSimulator = getContext().spawn(WeatherSimulator.create(this.weatherSensor), "WeatherSimulator");
+        this.weatherSimulator = getContext().spawn(WeatherSimulator.create(this.weatherSensor), "WeatherSimulator");
         this.mediaStation = getContext().spawn(MediaStation.create(this.blinds, "4", "1"), "MediaStation");
         this.fridge = getContext().spawn(Fridge.create(100, 100, "5", "1"), "Fridge");
-        //this.temperatureSimulator = getContext().spawn(TemperatureSimulator.create(this.tempSensor), "TemperatureSimulator");
+        this.temperatureSimulator = getContext().spawn(TemperatureSimulator.create(this.tempSensor), "TemperatureSimulator");
+        this.ui = getContext().spawn(UI.create(this.tempSensor, this.airCondition, this.weatherSensor, this.blinds, this.mediaStation, this.fridge), "UI");
 
-        ActorRef<Void> ui = getContext().spawn(UI.create(this.tempSensor, this.airCondition, this.weatherSensor, this.blinds, this.weatherSimulator, this.mediaStation, this.fridge, this.temperatureSimulator), "UI");
+        //Tell UI Actor it should start the command line
+        this.ui.tell(new UI.InitiateUI());
+
         getContext().getLog().info("HomeAutomation Application started");
     }
 

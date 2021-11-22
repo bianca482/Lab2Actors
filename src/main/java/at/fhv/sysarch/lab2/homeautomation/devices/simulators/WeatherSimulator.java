@@ -2,6 +2,7 @@ package at.fhv.sysarch.lab2.homeautomation.devices.simulators;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
+import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.*;
 import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 import at.fhv.sysarch.lab2.homeautomation.devices.WeatherSensor;
@@ -13,7 +14,7 @@ import java.util.Random;
 public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherSimulatorCommand> {
     public interface WeatherSimulatorCommand {}
 
-    public class WeatherSimulatorCommandImpl implements WeatherSimulatorCommand {}
+    public static class WeatherSimulatorCommandImpl implements WeatherSimulatorCommand {}
 
     private enum Timeout implements WeatherSimulatorCommand {
         INSTANCE
@@ -41,6 +42,7 @@ public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherS
         return newReceiveBuilder()
                 .onMessageEquals(Timeout.INSTANCE, this::onTimeout)
                 .onMessage(WeatherSimulatorCommand.class, this::onCommand)
+                .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
 
@@ -60,6 +62,11 @@ public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherS
 
         // Send message to weather sensor
         this.weatherSensor.tell(new WeatherSensor.ReadWeather(values.get(random.nextInt(size))));
+        return this;
+    }
+
+    private WeatherSimulator onPostStop() {
+        getContext().getLog().info("WeatherSimulator actor stopped");
         return this;
     }
 }
