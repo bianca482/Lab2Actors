@@ -17,9 +17,9 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderCommand
     public interface OrderCommand{}
 
     private final Order order;
-    private final ActorRef<Fridge.OrderCompleted> replyTo;
+    private final ActorRef<Fridge.FridgeCommand> replyTo;
 
-    private OrderProcessor(ActorContext<OrderCommand> context, ActorRef<Fridge.OrderCompleted> replyTo, Order order) {
+    private OrderProcessor(ActorContext<OrderCommand> context, ActorRef<Fridge.FridgeCommand> replyTo, Order order) {
         super(context);
         this.replyTo = replyTo;
         this.order = order;
@@ -29,7 +29,7 @@ public class OrderProcessor extends AbstractBehavior<OrderProcessor.OrderCommand
         sendResponse();
     }
 
-    public static Behavior<OrderCommand> create(ActorRef<Fridge.OrderCompleted> fridge, Order order) {
+    public static Behavior<OrderCommand> create(ActorRef<Fridge.FridgeCommand> fridge, Order order) {
         return Behaviors.setup(context -> new OrderProcessor(context, fridge, order));
     }
 

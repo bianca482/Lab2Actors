@@ -1,5 +1,6 @@
 package at.fhv.sysarch.lab2.homeautomation.devices;
 
+import akka.actor.ActorSelection;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
@@ -7,14 +8,18 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import at.fhv.sysarch.lab2.homeautomation.domain.Order;
 import at.fhv.sysarch.lab2.homeautomation.domain.Product;
 import at.fhv.sysarch.lab2.homeautomation.domain.Receipt;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 /*
 Fridge manages products and allows ordering new products.
@@ -45,7 +50,6 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     public interface FridgeCommand {}
 
     //Users can consume products from the Fridge.
-    //TODO Was bedeutet konsumieren? Triggert User dem WeightSensor & SpaceSensor oder direkt den Fridge?
     public static final class ConsumeProduct implements FridgeCommand {
         Product productToConsume;
         int amount;
@@ -57,11 +61,9 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     }
 
     //Users can order products at the Fridge.
-    //TODO Triggert User direkt den Fridge?
     public static final class OrderProduct implements FridgeCommand {
         Product productToOrder;
         int amount;
-
         ActorRef<FridgeCommand> respondTo;
 
         public OrderProduct(Product productToOrder, int amount, ActorRef<FridgeCommand> respondTo) {
@@ -69,11 +71,6 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             this.amount = amount;
             this.respondTo = respondTo;
         }
-//
-//        public OrderProduct(Product productToOrder, int amount) {
-//            this.productToOrder = productToOrder;
-//            this.amount = amount;
-//        }
     }
 
     //Antwort von OrderProcessor, wenn die Bestellung erfolgreich abgeschlossen wurde
@@ -99,6 +96,16 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private List<Order> orders;
     private double currentWeightLoad;
     private int currentNumberOfProducts;
+    private ActorRef<SpaceSensor.SpaceSensorCommand> spaceSensor;
+    private volatile AnswerFromSpaceSensor answerFromSpaceSensor;
+
+    public static final class AnswerFromSpaceSensor implements FridgeCommand {
+        boolean wasSuccessful;
+
+        public AnswerFromSpaceSensor(boolean wasSuccessful) {
+            this.wasSuccessful = wasSuccessful;
+        }
+    }
 
     private Fridge(ActorContext<FridgeCommand> context, int maxNumberOfProducts, int maxWeightLoad, String groupId, String deviceId) {
         super(context);
@@ -108,6 +115,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         this.deviceId = deviceId;
         this.products = new HashMap<>();
         this.orders = new LinkedList<>();
+
+        this.spaceSensor = getContext().spawn(SpaceSensor.create(this.getContext().getSelf(), maxNumberOfProducts), "SpaceSensor");
 
         getContext().getLog().info("Fridge started");
     }
@@ -121,8 +130,10 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         return newReceiveBuilder()
                 .onMessage(ConsumeProduct.class, this::onConsumeProduct)
                 .onMessage(OrderProduct.class, this::onOrderProduct)
+                .onMessage(OrderCompleted.class, this::onOrderCompleted)
                 .onMessage(QueryingStoredProducts.class, this::onQueryingStoredProducts)
                 .onMessage(QueryingHistoryOfOrders.class, this::onQueryingHistoryOfOrders)
+                .onMessage(AnswerFromSpaceSensor.class, this::onAnswerFromSpaceSensor)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
@@ -140,9 +151,28 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         return this;
     }
 
-    private Behavior<FridgeCommand> onOrderProduct(OrderProduct message) {
+    private Behavior<FridgeCommand> onOrderProduct(OrderProduct message) throws InterruptedException, TimeoutException, ExecutionException {
         getContext().getLog().info("Fridge received: User wants to order {}x {}", message.amount, message.productToOrder.getName());
-        if ((currentWeightLoad + (message.productToOrder.getWeight() * message.amount) <= maxWeightLoad) && (currentNumberOfProducts + message.amount <= maxNumberOfProducts)) {
+
+        this.spaceSensor.tell(new SpaceSensor.CanAddProduct(message.amount));
+
+//        if (answerFromSpaceSensor == null) {
+////            Timeout timeout = Timeout.create(Duration.ofSeconds(5));
+////            Future<Object> future = Patterns.ask(this.spaceSensor, new SpaceSensor.CanAddProduct(message.amount), timeout);
+////            String result = (String) Await.result(future, timeout.duration());
+//
+//            ExecutorService threadpool = Executors.newCachedThreadPool();
+//            Future<SpaceSensor.CanAddProduct> futureTask = threadpool.submit(() -> new SpaceSensor.CanAddProduct(message.amount));
+//
+//            while (!futureTask.isDone()) {
+//                System.out.println("FutureTask is not finished yet...");
+//            }
+//            SpaceSensor.CanAddProduct result = futureTask.get();
+//
+//            threadpool.shutdown();
+//        }
+
+        if ((currentWeightLoad + (message.productToOrder.getWeight() * message.amount) <= maxWeightLoad) && answerFromSpaceSensor.wasSuccessful) {
             // Add product
             if (products.containsKey(message.productToOrder)) {
                 int oldAmount = products.get(message.productToOrder);
@@ -155,7 +185,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             orders.add(order);
 
             //Per Session Actor
-            //getContext().spawn(OrderProcessor.create(message.respondTo, order), "OrderProcessor");
+            getContext().spawn(OrderProcessor.create(message.respondTo, order), "OrderProcessor");
 
             // Adjust current weight + number of products
             currentWeightLoad = currentWeightLoad + (message.productToOrder.getWeight() * message.amount);
@@ -165,6 +195,18 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         } else {
             getContext().getLog().info("Cannot order {}", message.productToOrder.getName());
         }
+
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onAnswerFromSpaceSensor(AnswerFromSpaceSensor message) {
+        getContext().getLog().info("Fridge received AnswerFromSpaceSensor. Was successful: {}", message.wasSuccessful);
+        this.answerFromSpaceSensor = message;
+        return this;
+    }
+
+    private Behavior<FridgeCommand> onOrderCompleted(OrderCompleted message) {
+        getContext().getLog().info("Fridge received OrderCompleted. Receipt: {}", message.receipt);
         return this;
     }
 
