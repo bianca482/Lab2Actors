@@ -101,7 +101,7 @@ public class UI extends AbstractBehavior<Void> {
                     if (command.length >= 4) {
                         amount = Integer.parseInt(command[3]);
                     }
-                    this.fridge.tell(new Fridge.OrderProduct(product, amount));
+                    this.fridge.tell(new Fridge.OrderProduct(product, amount, fridge));
                 }
                 else if (command[1].equals("consume")) {
                     Product product = new Product(command[2], 10, 0.3);
