@@ -1,5 +1,6 @@
 package at.fhv.sysarch.lab2.homeautomation.devices;
 
+import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.PostStop;
 import akka.actor.typed.javadsl.AbstractBehavior;
@@ -61,9 +62,26 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         Product productToOrder;
         int amount;
 
+//        ActorRef<OrderCompleted> respondTo;
+//
+//        public OrderProduct(Product productToOrder, int amount, ActorRef<OrderCompleted> respondTo) {
+//            this.productToOrder = productToOrder;
+//            this.amount = amount;
+//            this.respondTo = respondTo;
+//        }
+
         public OrderProduct(Product productToOrder, int amount) {
             this.productToOrder = productToOrder;
             this.amount = amount;
+        }
+    }
+
+    //Antwort von OrderProcessor, wenn die Bestellung erfolgreich abgeschlossen wurde
+    public static final class OrderCompleted implements FridgeCommand {
+        final Receipt receipt;
+
+        public OrderCompleted(Receipt receipt) {
+            this.receipt = receipt;
         }
     }
 
@@ -133,7 +151,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 products.put(message.productToOrder, message.amount);
             }
             // Add order
-            orders.add(new Order(message.productToOrder, message.amount));
+            Order order = new Order(message.productToOrder, message.amount);
+            orders.add(order);
+
+            //Per Session Actor
+            //getContext().spawn(OrderProcessor.create(message.respondTo, order), "OrderProcessor");
 
             // Adjust current weight + number of products
             currentWeightLoad = currentWeightLoad + (message.productToOrder.getWeight() * message.amount);
