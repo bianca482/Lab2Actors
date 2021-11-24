@@ -11,10 +11,7 @@ import at.fhv.sysarch.lab2.homeautomation.domain.Order;
 import at.fhv.sysarch.lab2.homeautomation.domain.Product;
 import at.fhv.sysarch.lab2.homeautomation.domain.Receipt;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 /*
@@ -146,6 +143,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 .build();
     }
 
+    //ToDo: Adjust current amount in space + weight sensor
     private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct message) {
         getContext().getLog().info("Fridge received: User wants to consume {}x {}", message.amount, message.productToConsume.getName());
         int amountOfProduct = products.get(message.productToConsume);
@@ -163,11 +161,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private OrderProduct lastOrderedProductMessage;
 
     private void onWeightAndSpaceResponse(){
-        if(answerFromSpaceSensor == null  || answerFromWeightSensor == null || lastOrderedProductMessage == null){
+        if (answerFromSpaceSensor == null  || answerFromWeightSensor == null || lastOrderedProductMessage == null){
             return;
         }
 
-        if ((currentWeightLoad + (lastOrderedProductMessage.productToOrder.getWeight() * lastOrderedProductMessage.amount) <= maxWeightLoad) && answerFromSpaceSensor.wasSuccessful) {
+        if (answerFromWeightSensor.wasSuccessful && answerFromSpaceSensor.wasSuccessful) {
             // Add product
             if (products.containsKey(lastOrderedProductMessage.productToOrder)) {
                 int oldAmount = products.get(lastOrderedProductMessage.productToOrder);
@@ -180,7 +178,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             orders.add(order);
 
             //Per Session Actor
-            getContext().spawn(OrderProcessor.create(lastOrderedProductMessage.respondTo, order), "OrderProcessor");
+            getContext().spawn(OrderProcessor.create(lastOrderedProductMessage.respondTo, order), "OrderProcessor" + UUID.randomUUID());
 
             // Adjust current weight + number of products
             currentWeightLoad = currentWeightLoad + (lastOrderedProductMessage.productToOrder.getWeight() * lastOrderedProductMessage.amount);
