@@ -20,6 +20,14 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
         }
     }
 
+    public static final class ProductsConsumed implements SpaceSensorCommand {
+        int amount;
+
+        public ProductsConsumed(int amount) {
+            this.amount = amount;
+        }
+    }
+
     private int currentNumberOfProducts;
     private final int maxNumberOfProducts;
     private final ActorRef<Fridge.FridgeCommand> fridge;
@@ -40,6 +48,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
     public Receive<SpaceSensorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(CanAddProduct.class, this::onNumberOfProducts)
+                .onMessage(ProductsConsumed.class, this::onProductsConsumed)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
@@ -52,6 +61,14 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
         } else {
             fridge.tell(new Fridge.AnswerFromSpaceSensor(false));
         }
+        return this;
+    }
+
+    private Behavior<SpaceSensorCommand> onProductsConsumed(ProductsConsumed n) {
+        getContext().getLog().info("SpaceSensor received {}", n.amount);
+
+        currentNumberOfProducts = n.amount;
+
         return this;
     }
 

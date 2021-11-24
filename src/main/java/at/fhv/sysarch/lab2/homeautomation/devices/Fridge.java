@@ -143,13 +143,16 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
                 .build();
     }
 
-    //ToDo: Adjust current amount in space + weight sensor
     private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct message) {
         getContext().getLog().info("Fridge received: User wants to consume {}x {}", message.amount, message.productToConsume.getName());
         int amountOfProduct = products.get(message.productToConsume);
         //Check if product can be consumed
         if (amountOfProduct - message.amount >= 0) {
             products.put(message.productToConsume, amountOfProduct - message.amount);
+
+            this.spaceSensor.tell(new SpaceSensor.ProductsConsumed(message.amount));
+            this.weightSensor.tell(new WeightSensor.ProductsConsumed(message.productToConsume.getWeight() * message.amount));
+
             getContext().getLog().info("Successfully consumed {}", message.productToConsume.getName());
         } else {
             getContext().getLog().info("Cannot consume {}", message.productToConsume.getName());
