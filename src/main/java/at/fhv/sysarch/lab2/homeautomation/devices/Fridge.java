@@ -11,10 +11,7 @@ import at.fhv.sysarch.lab2.homeautomation.domain.Order;
 import at.fhv.sysarch.lab2.homeautomation.domain.Product;
 import at.fhv.sysarch.lab2.homeautomation.domain.Receipt;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 /*
@@ -152,6 +149,10 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         //Check if product can be consumed
         if (amountOfProduct - message.amount >= 0) {
             products.put(message.productToConsume, amountOfProduct - message.amount);
+
+            this.spaceSensor.tell(new SpaceSensor.ProductsConsumed(message.amount));
+            this.weightSensor.tell(new WeightSensor.ProductsConsumed(message.productToConsume.getWeight() * message.amount));
+
             getContext().getLog().info("Successfully consumed {}", message.productToConsume.getName());
         } else {
             getContext().getLog().info("Cannot consume {}", message.productToConsume.getName());
@@ -163,11 +164,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private OrderProduct lastOrderedProductMessage;
 
     private void onWeightAndSpaceResponse(){
-        if(answerFromSpaceSensor == null  || answerFromWeightSensor == null || lastOrderedProductMessage == null){
+        if (answerFromSpaceSensor == null  || answerFromWeightSensor == null || lastOrderedProductMessage == null){
             return;
         }
 
-        if ((currentWeightLoad + (lastOrderedProductMessage.productToOrder.getWeight() * lastOrderedProductMessage.amount) <= maxWeightLoad) && answerFromSpaceSensor.wasSuccessful) {
+        if (answerFromWeightSensor.wasSuccessful && answerFromSpaceSensor.wasSuccessful) {
             // Add product
             if (products.containsKey(lastOrderedProductMessage.productToOrder)) {
                 int oldAmount = products.get(lastOrderedProductMessage.productToOrder);
@@ -180,7 +181,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             orders.add(order);
 
             //Per Session Actor
-            getContext().spawn(OrderProcessor.create(lastOrderedProductMessage.respondTo, order), "OrderProcessor");
+            getContext().spawn(OrderProcessor.create(lastOrderedProductMessage.respondTo, order), "OrderProcessor" + UUID.randomUUID());
 
             // Adjust current weight + number of products
             currentWeightLoad = currentWeightLoad + (lastOrderedProductMessage.productToOrder.getWeight() * lastOrderedProductMessage.amount);
