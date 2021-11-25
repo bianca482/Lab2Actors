@@ -166,7 +166,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         Product product = productMap.get(message.productToConsume);
 
         if (!productAmountMap.containsKey(product)) {
-            getContext().getLog().info("No product to consume available {}", message.productToConsume);
+            getContext().getLog().info("No {} to consume available ", message.productToConsume);
             return this;
         }
 
@@ -177,6 +177,12 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
             this.spaceSensor.tell(new SpaceSensor.ProductsConsumed(message.amount));
             this.weightSensor.tell(new WeightSensor.ProductsConsumed(product.getWeight() * message.amount));
+
+            // If a product runs out in the fridge it is automatically ordered again.
+            if(productAmountMap.get(product)== 0){
+                getContext().getLog().info("Ordering new product because all products are consumed: {}", product.getName());
+                getContext().getSelf().tell((new Fridge.OrderProduct(product.getName(), 1, getContext().getSelf())));
+            }
 
             getContext().getLog().info("Successfully consumed {}", product.getName());
         } else {
