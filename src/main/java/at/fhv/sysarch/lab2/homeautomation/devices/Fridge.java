@@ -12,7 +12,6 @@ import at.fhv.sysarch.lab2.homeautomation.domain.Product;
 import at.fhv.sysarch.lab2.homeautomation.domain.Receipt;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 /*
 Fridge manages products and allows ordering new products.
@@ -44,10 +43,10 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
     //Users can consume products from the Fridge.
     public static final class ConsumeProduct implements FridgeCommand {
-        Product productToConsume;
+        String productToConsume;
         int amount;
 
-        public ConsumeProduct(Product productToConsume, int amount) {
+        public ConsumeProduct(String productToConsume, int amount) {
             this.productToConsume = productToConsume;
             this.amount = amount;
         }
@@ -55,11 +54,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
     //Users can order products at the Fridge.
     public static final class OrderProduct implements FridgeCommand {
-        Product productToOrder;
+        String productToOrder;
         int amount;
         ActorRef<FridgeCommand> respondTo;
 
-        public OrderProduct(Product productToOrder, int amount, ActorRef<FridgeCommand> respondTo) {
+        public OrderProduct(String productToOrder, int amount, ActorRef<FridgeCommand> respondTo) {
             this.productToOrder = productToOrder;
             this.amount = amount;
             this.respondTo = respondTo;
@@ -85,7 +84,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private final int maxWeightLoad;
     private final String groupId;
     private final String deviceId;
-    private Map<Product, Integer> products;
+    private Map<Product, Integer> productAmountMap; // speichert sich die Anzahl der Produkte
+    private Map<String, Product> productMap;        // mappt Produktname zu Produkt
     private List<Order> orders;
     private double currentWeightLoad;
     private int currentNumberOfProducts;
@@ -117,12 +117,25 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         this.maxWeightLoad = maxWeightLoad;
         this.groupId = groupId;
         this.deviceId = deviceId;
-        this.products = new HashMap<>();
+        this.productMap = new HashMap<>();
+        this.productAmountMap = new HashMap<>();
         this.orders = new LinkedList<>();
+
+        initializeProductMap();
 
         this.spaceSensor = getContext().spawn(SpaceSensor.create(this.getContext().getSelf(), maxNumberOfProducts), "SpaceSensor");
         this.weightSensor = getContext().spawn(WeightSensor.create(this.getContext().getSelf(), maxWeightLoad), "WeightSensor");
         getContext().getLog().info("Fridge started");
+    }
+
+    private void initializeProductMap() {
+        productMap.put("milk", new Product("milk", 1.00, 1.00));
+        productMap.put("cheese", new Product("cheese", 8.00, 0.50));
+        productMap.put("yogurt", new Product("yogurt", 0.49, 0.20));
+        productMap.put("butter", new Product("butter", 2.50, 0.25));
+        productMap.put("chicken", new Product("chicken", 18.00, 1.25));
+        productMap.put("coke", new Product("coke", 1.79, 1.50));
+        productMap.put("salad", new Product("salad", 1.50, 1.00));
     }
 
     public static Behavior<Fridge.FridgeCommand> create(int maxNumberOfProducts, int maxWeightLoad, String groupId, String deviceId) {
@@ -144,18 +157,30 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     }
 
     private Behavior<FridgeCommand> onConsumeProduct(ConsumeProduct message) {
-        getContext().getLog().info("Fridge received: User wants to consume {}x {}", message.amount, message.productToConsume.getName());
-        int amountOfProduct = products.get(message.productToConsume);
+        getContext().getLog().info("Fridge received: User wants to consume {}x {}", message.amount, message.productToConsume);
+
+        if (!productMap.containsKey(message.productToConsume)) {
+            getContext().getLog().info("unknown product {}", message.productToConsume);
+            return this;
+        }
+        Product product = productMap.get(message.productToConsume);
+
+        if (!productAmountMap.containsKey(product)) {
+            getContext().getLog().info("No product to consume available {}", message.productToConsume);
+            return this;
+        }
+
+        int amountOfProduct = productAmountMap.get(product);
         //Check if product can be consumed
         if (amountOfProduct - message.amount >= 0) {
-            products.put(message.productToConsume, amountOfProduct - message.amount);
+            productAmountMap.put(product, amountOfProduct - message.amount);
 
             this.spaceSensor.tell(new SpaceSensor.ProductsConsumed(message.amount));
-            this.weightSensor.tell(new WeightSensor.ProductsConsumed(message.productToConsume.getWeight() * message.amount));
+            this.weightSensor.tell(new WeightSensor.ProductsConsumed(product.getWeight() * message.amount));
 
-            getContext().getLog().info("Successfully consumed {}", message.productToConsume.getName());
+            getContext().getLog().info("Successfully consumed {}", product.getName());
         } else {
-            getContext().getLog().info("Cannot consume {}", message.productToConsume.getName());
+            getContext().getLog().info("Cannot consume {}", product.getName());
         }
         return this;
     }
@@ -163,43 +188,50 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
     private OrderProduct lastOrderedProductMessage;
 
-    private void onWeightAndSpaceResponse(){
-        if (answerFromSpaceSensor == null  || answerFromWeightSensor == null || lastOrderedProductMessage == null){
+    private void onWeightAndSpaceResponse() {
+        if (answerFromSpaceSensor == null || answerFromWeightSensor == null || lastOrderedProductMessage == null) {
             return;
         }
+        Product product = productMap.get(lastOrderedProductMessage.productToOrder);
 
         if (answerFromWeightSensor.wasSuccessful && answerFromSpaceSensor.wasSuccessful) {
             // Add product
-            if (products.containsKey(lastOrderedProductMessage.productToOrder)) {
-                int oldAmount = products.get(lastOrderedProductMessage.productToOrder);
-                products.put(lastOrderedProductMessage.productToOrder, oldAmount + lastOrderedProductMessage.amount);
+
+            if (productAmountMap.containsKey(product)) {
+                int oldAmount = productAmountMap.get(product);
+                productAmountMap.put(product, oldAmount + lastOrderedProductMessage.amount);
             } else {
-                products.put(lastOrderedProductMessage.productToOrder, lastOrderedProductMessage.amount);
+                productAmountMap.put(product, lastOrderedProductMessage.amount);
             }
             // Add order
-            Order order = new Order(lastOrderedProductMessage.productToOrder, lastOrderedProductMessage.amount);
+            Order order = new Order(product, lastOrderedProductMessage.amount);
             orders.add(order);
 
             //Per Session Actor
             getContext().spawn(OrderProcessor.create(lastOrderedProductMessage.respondTo, order), "OrderProcessor" + UUID.randomUUID());
 
             // Adjust current weight + number of products
-            currentWeightLoad = currentWeightLoad + (lastOrderedProductMessage.productToOrder.getWeight() * lastOrderedProductMessage.amount);
+            currentWeightLoad = currentWeightLoad + (product.getWeight() * lastOrderedProductMessage.amount);
             currentNumberOfProducts = currentNumberOfProducts + lastOrderedProductMessage.amount;
 
-            getContext().getLog().info("Successfully ordered {}", lastOrderedProductMessage.productToOrder.getName());
+            getContext().getLog().info("Successfully ordered {}", product.getName());
         } else {
-            getContext().getLog().info("Cannot order {}", lastOrderedProductMessage.productToOrder.getName());
+            getContext().getLog().info("Cannot order {}", product.getName());
         }
     }
 
     private Behavior<FridgeCommand> onOrderProduct(OrderProduct message) {
-        getContext().getLog().info("Fridge received: User wants to order {}x {}", message.amount, message.productToOrder.getName());
+        getContext().getLog().info("Fridge received: User wants to order {}x {}", message.amount, message.productToOrder);
+        if (!productMap.containsKey(message.productToOrder)) {
+            getContext().getLog().info("unknown product {}", message.productToOrder);
+            return this;
+        }
+        Product product = productMap.get(message.productToOrder);
         answerFromSpaceSensor = null;
         answerFromWeightSensor = null;
         lastOrderedProductMessage = message;
         this.spaceSensor.tell(new SpaceSensor.CanAddProduct(message.amount));
-        this.weightSensor.tell(new WeightSensor.CanAddProduct(message.amount));
+        this.weightSensor.tell(new WeightSensor.CanAddProduct(message.amount * product.getWeight()));
 
         return this;
     }
@@ -225,7 +257,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
     private Behavior<FridgeCommand> onQueryingStoredProducts(QueryingStoredProducts message) {
         getContext().getLog().info("Fridge received QueryingStoredProducts Command");
-        System.out.println(products.entrySet());
+        System.out.println(productAmountMap.entrySet());
         return this;
     }
 

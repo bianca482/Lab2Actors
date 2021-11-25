@@ -99,21 +99,20 @@ public class UI extends AbstractBehavior<UI.UICommand> {
                 this.weatherSensor.tell(new WeatherSensor.ReadWeather(weather));
             }
             if (command[0].equals("f")) {
+                // TODO think about what to to with price and weight
                 if (command[1].equals("order")) {
-                    Product product = new Product(command[2], 10, 0.3);
                     int amount = 1;
                     if (command.length >= 4) {
                         amount = Integer.parseInt(command[3]);
                     }
-                    this.fridge.tell(new Fridge.OrderProduct(product, amount, fridge));
+                    this.fridge.tell(new Fridge.OrderProduct(command[2], amount, fridge));
                 }
                 else if (command[1].equals("consume")) {
-                    Product product = new Product(command[2], 10, 0.3);
                     int amount = 1;
                     if (command.length >= 4) {
                         amount = Integer.parseInt(command[3]);
                     }
-                    this.fridge.tell(new Fridge.ConsumeProduct(product, amount));
+                    this.fridge.tell(new Fridge.ConsumeProduct(command[2], amount));
                 } else if (command[1].equals("products")) {
                     this.fridge.tell(new Fridge.QueryingStoredProducts());
                 } else if (command[1].equals("orders")) {
