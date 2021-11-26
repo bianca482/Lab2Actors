@@ -22,24 +22,23 @@ A new movie cannot be started if another movie is already playing.
  */
 public class MediaStation extends AbstractBehavior<MediaStation.MediaStationCommand> {
 
-    public interface MediaStationCommand {
-    }
+    public interface MediaStationCommand {}
 
-    private static Optional<Boolean> playingMovie = Optional.empty();
+    private static Optional<Boolean> playingMovie;
 
     public static final class ReadMediaStation implements MediaStation.MediaStationCommand {
         final Optional<Boolean> isPlayingMovie;
 
         public ReadMediaStation(Optional<Boolean> isPlayingMovie) {
-            if (playingMovie.isEmpty() || (playingMovie.isPresent() && playingMovie.get().equals(false))) {
-                this.isPlayingMovie = isPlayingMovie;
-            } else {
-                this.isPlayingMovie = Optional.empty();
+            this.isPlayingMovie = isPlayingMovie;
+            //Wenn schon ein Film läuft
+            if (!(playingMovie.isEmpty() || playingMovie.get().equals(false))) {
+                playingMovie = isPlayingMovie;
             }
         }
     }
 
-    private ActorRef<Blinds.BlindsCommand> blinds;
+    private final ActorRef<Blinds.BlindsCommand> blinds;
     private final String groupId;
     private final String deviceId;
 
@@ -52,6 +51,8 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
         this.blinds = blinds;
         this.groupId = groupId;
         this.deviceId = deviceId;
+        playingMovie = Optional.empty();
+
         getContext().getLog().info("Media Station started");
     }
 
@@ -65,9 +66,14 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
 
     private Behavior<MediaStationCommand> onReadMediaStation(ReadMediaStation m) {
         // A new movie cannot be started if another movie is already playing.
-        if (playingMovie.isEmpty() || (playingMovie.isPresent() && playingMovie.get().equals(false))) {
+        if (playingMovie.isEmpty() || playingMovie.get().equals(false)) {
             getContext().getLog().info("Media Station received {}", m.isPlayingMovie);
+
+            playingMovie = m.isPlayingMovie;
+
             this.blinds.tell(new Blinds.ControlBlinds(m.isPlayingMovie.get()));
+        } else {
+            getContext().getLog().info("Cannot play new movie because another movie is already playing.");
         }
         return this;
     }

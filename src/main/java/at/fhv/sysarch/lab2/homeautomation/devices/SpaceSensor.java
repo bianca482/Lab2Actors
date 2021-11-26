@@ -9,9 +9,9 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 
 public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand> {
-    public interface SpaceSensorCommand {
-    }
+    public interface SpaceSensorCommand {}
 
+    // Prüft, ob genug Platz für die gewünschte Bestellung ist
     public static final class CanAddProduct implements SpaceSensorCommand {
         int amount;
 
@@ -20,6 +20,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
         }
     }
 
+    // Passt die aktuelle Anzahl an Produkten an
     public static final class ProductsConsumed implements SpaceSensorCommand {
         int amount;
 
@@ -74,6 +75,7 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
 
     private SpaceSensor onPostStop() {
         getContext().getLog().info("SpaceSensor actor stopped");
+
         return this;
     }
 }

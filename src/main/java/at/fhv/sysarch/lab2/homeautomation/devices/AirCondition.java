@@ -48,13 +48,15 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
 
     private final String groupId;
     private final String deviceId;
-    private boolean active = false;
-    private boolean poweredOn = true;
+    private boolean active;
+    private boolean poweredOn;
 
     public AirCondition(ActorContext<AirConditionCommand> context, String groupId, String deviceId) {
         super(context);
         this.groupId = groupId;
         this.deviceId = deviceId;
+        this.active = false;
+        this.poweredOn = true;
 
         getContext().getLog().info("AirCondition started");
     }
@@ -74,7 +76,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
 
     private Behavior<AirConditionCommand> onReadTemperature(EnrichedTemperature r) {
         getContext().getLog().info("Aircondition reading {}", r.temperature.getValue());
-        // TODO: evtl. process temperature
+
         if (r.temperature.getValue() >= 20) {
             getContext().getLog().info("Aircondition actived");
             this.active = true;
@@ -90,7 +92,8 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private Behavior<AirConditionCommand> onPowerAirConditionOff(PowerAirCondition r) {
         getContext().getLog().info("Turning Aircondition to {}", r.value);
 
-        if (r.value.get() == false) {
+        // Wenn AC ausgeschaltet werden soll
+        if (r.value.isPresent() && !r.value.get()) {
             return this.powerOff();
         }
         return this;
@@ -99,7 +102,8 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
     private Behavior<AirConditionCommand> onPowerAirConditionOn(PowerAirCondition r) {
         getContext().getLog().info("Turning Aircondition to {}", r.value);
 
-        if (r.value.get() == true) {
+        //Wenn AC eingeschalten werden soll
+        if (r.value.isPresent() && r.value.get()) {
             return Behaviors.receive(AirConditionCommand.class)
                     .onMessage(EnrichedTemperature.class, this::onReadTemperature)
                     .onMessage(PowerAirCondition.class, this::onPowerAirConditionOff)
@@ -111,6 +115,7 @@ public class AirCondition extends AbstractBehavior<AirCondition.AirConditionComm
 
     private Behavior<AirConditionCommand> powerOff() {
         this.poweredOn = false;
+        //Neues Verhalten, wenn AC ausgeschalten ist
         return Behaviors.receive(AirConditionCommand.class)
                 .onMessage(PowerAirCondition.class, this::onPowerAirConditionOn)
                 .onSignal(PostStop.class, signal -> onPostStop())

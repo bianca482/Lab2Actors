@@ -49,6 +49,7 @@ public class TemperatureSimulator extends AbstractBehavior<TemperatureSimulator.
 
     private Behavior<TemperatureSimulator.TemperatureSimulatorCommand> onCommand(TemperatureSimulatorCommand message) {
         getContext().getLog().info("TemperatureSimulatorCommand received");
+
         Duration delay = Duration.ofSeconds(1);
         timers.startSingleTimer(TIMER_KEY, TemperatureSimulator.Timeout.INSTANCE, delay);
         return this;
@@ -69,6 +70,7 @@ public class TemperatureSimulator extends AbstractBehavior<TemperatureSimulator.
 
     private TemperatureSimulator onPostStop() {
         getContext().getLog().info("TemperatureSimulator actor stopped");
+
         return this;
     }
 }

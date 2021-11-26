@@ -48,6 +48,7 @@ public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherS
 
     private Behavior<WeatherSimulatorCommand> onCommand(WeatherSimulatorCommand message) {
         getContext().getLog().info("WeatherSimulatorCommand received");
+
         Duration delay = Duration.ofSeconds(1);
         timers.startSingleTimer(TIMER_KEY, Timeout.INSTANCE, delay);
         return this;
@@ -67,6 +68,7 @@ public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherS
 
     private WeatherSimulator onPostStop() {
         getContext().getLog().info("WeatherSimulator actor stopped");
+
         return this;
     }
 }

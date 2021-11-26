@@ -10,9 +10,9 @@ import akka.actor.typed.javadsl.Receive;
 
 public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorCommand> {
 
-    public interface WeightSensorCommand {
-    }
+    public interface WeightSensorCommand {}
 
+    //Prüft, ob das Produkt bestellt werden kann
     public static final class CanAddProduct implements WeightSensorCommand {
         double weight;
 
@@ -21,6 +21,7 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
         }
     }
 
+    //Passt das aktuelle Gesamtgewicht an
     public static final class ProductsConsumed implements WeightSensorCommand {
         double weightLoad;
 
