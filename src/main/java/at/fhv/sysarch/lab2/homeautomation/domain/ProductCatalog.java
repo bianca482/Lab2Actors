@@ -20,6 +20,7 @@ public class ProductCatalog {
         productMap.put("chicken", new Product("chicken", 18.00, 1.25));
         productMap.put("coke", new Product("coke", 1.79, 1.50));
         productMap.put("salad", new Product("salad", 1.50, 1.00));
+        productMap.put("beef", new Product("beef", 200.00, 50));
     }
 
     public Map<String, Product> getProductMap() {
