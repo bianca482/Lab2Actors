@@ -72,7 +72,7 @@ public class UI extends AbstractBehavior<UI.UICommand> {
 
             if (command.length >= 1) {
                 switch (command[0]) {
-                    case "t" -> this.tempSensor.tell(new TemperatureSensor.ReadTemperature(new Temperature(Double.parseDouble(command[1]), Temperature.Unit.CELSIUS)));
+                    case "t" -> this.tempSensor.tell(new TemperatureSensor.ReadTemperature(new Temperature(Double.parseDouble(command[1]), Temperature.Unit.GRAD_CELSIUS)));
                     case "a" -> this.airCondition.tell(new AirCondition.PowerAirCondition(Optional.of(Boolean.valueOf(command[1]))));
                     case "m" -> this.mediaStation.tell(new MediaStation.ReadMediaStation(Optional.of(Boolean.valueOf(command[1]))));
                     case "w" -> {

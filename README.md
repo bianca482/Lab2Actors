@@ -21,7 +21,7 @@ einen Überblick darüber, welche Actors es gibt und wer mit wem kommuniziert.
 <img src="src/main/resources/Lab2_Actors_Communication_v4.jpg" alt="Kommunikation Actors"/>
 
 In der Abbildung ist ersichtlich, dass das System über die Klasse "HomeAutomationSystem"
-gestartet wird. Diese erstellt einen "HomeAutomationController", welche
+gestartet wird. Diese erstellt einen "HomeAutomationController", welcher
 alle Actors des Systems erstellt. Der "HomeAutomationController" schickt
 außerdem eine Nachricht an den "UI"-Actor, damit dieser einen neuen Thread mit
 startet und der User somit Befehle eingeben kann.
@@ -154,4 +154,59 @@ auch nachträglich leicht weitere Wetterzustände gespeichert werden könnten.
 Rules + Functionality erklären (welche Testfälle wir ausprobiert haben, welches Device wann wie reagiert)
 
 Erklärung, wie Befehle in UI eingegeben werden müssen
+
+---------------------------------------------------------------------------
+## 3. Verwendung Applikation
+
+### 3.1 Bedienung UI
+Um die Applikation zu bedienen, muss zuerst das HomeAutomationSystem gestartet werden.
+Im Anschluss können über die Kommandozeile Commands eingegeben werden, welche vom UI entgegengenommen und an die zuständigen Actors weitergeleitet werden.
+Folgend werden die bereitgestellten Commands aufgelistet und beschrieben, wie diese verwendet werden können um die Applikation zu bedienen.
+
+#### 3.1.1 Temperatur verändern:
+
+- #### Command: t [temperature]
+
+Mit "t" wird angedeutet, dass die Umgebungstemperatur verändert werden soll.
+Die Temperatur muss als Zahl angegeben werden und entspricht der Einheit "Grad Celsius".
+Die Einheit wird automatisch angehängt.
+Da die Temperatur über einen TemperatureSensor gesteuert wird, ist des nicht nötig, dieses Command händisch auszuführen, es wurde aber für Testzwecke implementiert.
+
+#### 3.1.2 AC ein- oder ausschalten:
+
+- ##### Command: a [true/false]
+
+Mit "a" wird angedeutet, dass die AC bedient werden soll.
+Mit [true] kann die AC eingeschaltet, mit [false] kann sie ausgeschalten werden.
+
+#### 3.1.3 Mediastation bedienen:
+
+- #### Command: m [true/false]
+
+Mit "m" wird angedeutet, dass die Media Station bedient werden soll.
+Mit [true] kann ein Film gestartet werden, mit [false] kann ein Film gestoppt werden.
+
+#### 3.1.4 Wetter verändern:
+
+- #### Command: w [sunny/cloudy]
+
+Mit "w" wird angedeutet, dass das Wetter verändert werden soll.
+Die Wettersituation kann mit [sunny] auf sonnig und mit [cloudy] auf wolking geändert werden.
+Da das Wetter über einen WeatherSensor gesteuert wird, ist des nicht nötig, dieses Command händisch auszuführen, es wurde aber für Testzwecke implementiert.
+
+#### 3.1.5 Kühlschrank bedienen:
+
+- #### Command: f
+
+3.1.5.1 Produkt bestellen:
+- #### Command: f order [product] [Optional amount]
+3.1.5.2 Produkt konsumieren:
+- #### Command: f consume [product] [Optional amount]
+3.1.5.3 Produkte in Kühlschrank ausgeben:
+- #### Command: f products
+3.1.5.4 Bestellhistorie ausgeben:
+- #### Command: f orders
+3.1.5.5 Produktkatalog ausgeben:
+- #### Command: f catalog
+
 
