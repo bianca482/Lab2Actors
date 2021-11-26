@@ -118,6 +118,16 @@ public class UI extends AbstractBehavior<UI.UICommand> {
                 } else if (command[1].equals("orders")) {
                     this.fridge.tell(new Fridge.QueryingHistoryOfOrders());
                 }
+                else if (command[1].equalsIgnoreCase("catalog")) {
+                    System.out.println("Please enter '[name] [price] [weight]' of the product");
+                    reader = scanner.nextLine();
+                    command = reader.split(" ");
+                    if (command.length >= 3) {
+                        this.fridge.tell(new Fridge.AddProductToCatalog(command[0], Double.parseDouble(command[1]), Double.parseDouble(command[2])));
+                    } else {
+                        System.out.println("Could not add product to product catalog. Please provide name, price and weight of the product");
+                    }
+                }
             }
             // TODO: process Input
         }
