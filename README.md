@@ -164,8 +164,7 @@ Im Anschluss können über die Kommandozeile Commands eingegeben werden, welche 
 Folgend werden die bereitgestellten Commands aufgelistet und beschrieben, wie diese verwendet werden können um die Applikation zu bedienen.
 
 #### 3.1.1 Temperatur verändern:
-
-- #### Command: t [temperature]
+- Command: t [temperature]
 
 Mit "t" wird angedeutet, dass die Umgebungstemperatur verändert werden soll.
 Die Temperatur muss als Zahl angegeben werden und entspricht der Einheit "Grad Celsius".
@@ -173,22 +172,19 @@ Die Einheit wird automatisch angehängt.
 Da die Temperatur über einen TemperatureSensor gesteuert wird, ist des nicht nötig, dieses Command händisch auszuführen, es wurde aber für Testzwecke implementiert.
 
 #### 3.1.2 AC ein- oder ausschalten:
-
-- ##### Command: a [true/false]
+- Command: a [true/false]
 
 Mit "a" wird angedeutet, dass die AC bedient werden soll.
 Mit [true] kann die AC eingeschaltet, mit [false] kann sie ausgeschalten werden.
 
 #### 3.1.3 Mediastation bedienen:
-
-- #### Command: m [true/false]
+- Command: m [true/false]
 
 Mit "m" wird angedeutet, dass die Media Station bedient werden soll.
 Mit [true] kann ein Film gestartet werden, mit [false] kann ein Film gestoppt werden.
 
 #### 3.1.4 Wetter verändern:
-
-- #### Command: w [sunny/cloudy]
+- Command: w [sunny/cloudy]
 
 Mit "w" wird angedeutet, dass das Wetter verändert werden soll.
 Die Wettersituation kann mit [sunny] auf sonnig und mit [cloudy] auf wolking geändert werden.
@@ -196,17 +192,38 @@ Da das Wetter über einen WeatherSensor gesteuert wird, ist des nicht nötig, di
 
 #### 3.1.5 Kühlschrank bedienen:
 
-- #### Command: f
+Um den Kühlschrank zu bedienen, wurde bei der Initialisierung des Kühlschranks ein Default-Produktkatalog erstellt der folgende Artikel enthält:
+milk, cheese, yogurt, butter, chicken, coke, salad.
+Diese Produkte können bestellt und konsumiert werden. Sollten andere Produkte bestellt oder konsumiert werden wollen, können diese manuell hinzugefügt werden.
 
-3.1.5.1 Produkt bestellen:
-- #### Command: f order [product] [Optional amount]
-3.1.5.2 Produkt konsumieren:
-- #### Command: f consume [product] [Optional amount]
-3.1.5.3 Produkte in Kühlschrank ausgeben:
-- #### Command: f products
-3.1.5.4 Bestellhistorie ausgeben:
-- #### Command: f orders
-3.1.5.5 Produktkatalog ausgeben:
-- #### Command: f catalog
+**Produkt zum Produktkatalog hinzufügen:**
+- Command: f catalog
+
+Mit "f" wird angedeutet, dass der Kühlschrank angesprochen werden soll und mit "catalog", dass ein Produkt zum Produktkatalog hinzugefügt werden soll.
+Daraufhin erscheint die Meldung, dass [name] [price] [weight] des Produktes, welches hinzugefügt werden will, eingegeben werden soll.
+Dem Produkt kann ein beliebiger Name, ein beliebiger Preis als Zahl und ein beliebiges Gewicht als Zahl mitgegeben werden.
+
+**Produkt bestellen:**
+- Command: f order [name] [Optional amount]
+    
+Mit "order" wird angedeutet, dass eine Produkt-Bestellung aufgegeben werden soll.
+Dazu muss der Produktname angegeben werden. Zusätzlich kann die zu bestellende Menge angegeben werden, wird diese nicht angegeben, wird das Produkt automatisch 1x bestellt.
+
+**Produkt konsumieren:**
+- Command: f consume [name] [Optional amount]
+
+Mit "consume" wird angedeutet, dass ein Produkt konsumiert werden soll.
+Dazu muss der Produktname angegeben werden. Zusätzlich kann die zu konusmierende Menge angegeben werden, wird diese nicht angegeben, wird das Produkt automatisch 1x konsumiert.
+  
+**Im Kühlschrank befindliche Produkte ausgeben:**
+- Command: f products 
+  
+Mit "products" wird eine Liste an Produkten ausgegeben, welche sich aktuell im Kühlschrank befinden.
+
+**Bestellhistorie ausgeben:**
+- Command: f orders
+
+Mit "orders" wird eine Historie der erfolgreich durchgeführten Bestellungen ausgegeben.
+
 
 
