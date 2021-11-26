@@ -26,7 +26,7 @@ alle Actors des Systems erstellt. Der "HomeAutomationController" schickt
 außerdem eine Nachricht an den "UI"-Actor, damit dieser einen neuen Thread mit
 startet und der User somit Befehle eingeben kann.
 
-### UI
+### 2.1 UI
 Das "UI" nimmt die Anfragen des Users entgegen und sendet diese an die
 entsprechenden Actors weiter.
 
@@ -41,14 +41,14 @@ der "Fridge", "AC", "MediaStation", "TemperatureSensor" und "WeatherSensor". Die
 jeweils über das "Fire and Forget"-Pattern verschickt.
 
 
-### MediaStation
+### 2.2 MediaStation
 Über die "MediaStation" kann ein Film abgespielt werden. 
 #### Kommunikation und eingesetzte Interaktions-Pattern
 Diese schickt nach dem "Fire and Forget"-Ansatz den "Blinds" Nachrichten. 
 Dabei wird den "Blinds" mitgeteilt, ob aktuell gerade ein Film läuft oder nicht.
 
 
-### TemperatureSimulator
+### 2.3 TemperatureSimulator
 Der "TemperatureSimulator" schickt sich prinzipiell nach einem selbstgewählten
 Timeout immer selbst Nachrichten. Wenn das Timeout erreicht wurde, wird
 die Temperatur um einen zufälligen Wert im Bereich von -1 bis +1 Grad erhöht/verringert
@@ -60,14 +60,14 @@ und dem Sensor erfolgt dabei über das Pattern "Fire and Forget".
 Der Simulator kennt daher den Sensor und pushed die neue Temperatur einfach auf den Sensor.
 
 
-### TemperatureSensor
+### 2.4 TemperatureSensor
 Bekommt vom "TemperaturSimulator" oder vom "UI" eine Temperatur.
 #### Kommunikation und eingesetzte Interaktions-Pattern
 Der "TemperatureSensor" kennt nur den "AC" und schickt diesem nach dem
 Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur.
 
 
-### AC
+### 2.5 AC
 Der "AC" erhält Nachrichten vom "TemperatureSensor" und schaltet sich je nach Temperatur
 ein- bzw. aus. Zusätzlich kann dieser Actor auch von außen komplett ausgeschalten werden.
 Per Default läuft der "AC" zwar, ist aber auf Standby geschalten (kühlt nicht).
@@ -75,7 +75,7 @@ Per Default läuft der "AC" zwar, ist aber auf Standby geschalten (kühlt nicht)
 Kennt keinen anderen Actor. 
 
 
-### WeatherSimulator
+### 2.6 WeatherSimulator
 Bei dem "WeatherSimulator" verhält es sich genau gleich wie beim "TemperatureSimulator", nur 
 mit dem Unterschied, dass dieser Simulator zufällig ein Wetter generiert.
 #### Kommunikation und eingesetzte Interaktions-Pattern
@@ -84,14 +84,14 @@ damit in einem Intervall immer wieder ein neues Wetter generiert wird. Das Wette
 wird wieder nach dem "Fire and Forget"-Ansatz dem "WeatherSensor" weitergeschickt.
 
 
-### WeatherSensor
+### 2.7 WeatherSensor
 Bekommt vom "WeatherSimulator" ein Wetter.
 #### Kommunikation und eingesetzte Interaktions-Pattern
 Der "WeatherSensor" kennt die "Blinds" und pushed das aktuelle Wetter
 auf die "Blinds" (= "Fire and Forget").
 
 
-### Blinds
+### 2.8 Blinds
 Die "Blinds" bekommen von der "MediaStation" und dem "WeatherSensor" Nachrichten 
 zugeschickt. Je nachdem, welche Werte übermittelt wurden, ändert sich der Öffnungszustand 
 der "Blinds".
@@ -99,7 +99,7 @@ der "Blinds".
 Kennt keinen anderen Aktor.
 
 
-### Fridge
+### 2.9 Fridge
 Der "Fridge" hat selber zwei eigene Sensoren, den "WeightSensor" und den "SpaceSensor".
 Diese werden beim Erstellen des Kühlschranks initialisiert und erhalten somit auch
 die maximale Anzahl an Produkten bzw. das mögliche Maximalgewicht. Im Falle der 
@@ -110,10 +110,10 @@ geprüft haben, ob die Bestellung von ihrer Seite aus durchgeführt werden kann.
 Ist die Bestellung möglich, wird ein "Per session child Actor" namens "OrderProcessor" 
 erstellt, welcher die Bestellung abschließt. 
 
-- #### WeightSensor und SpaceSensor
+- #### 2.9.1 WeightSensor und SpaceSensor
 Beide Sensoren bekommen jeweils einen Request vom "Fridge", bearbeiten die Anfrage und 
 schicken dem "Fridge" eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen.
-- #### OrderProcessor
+- #### 2.9.2 OrderProcessor
 Wird als "Per session child Actor" vom "Fridge" erstellt und erhält auf diesen entsprechend
 auch eine Referenz. Er erstellt eine passende Rechnung, welche er dem "Fridge" zurückschickt.
 
