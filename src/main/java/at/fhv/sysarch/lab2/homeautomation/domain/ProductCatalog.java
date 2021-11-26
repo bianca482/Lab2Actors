@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ProductCatalog {
 
-    private Map<String, Product> productMap;
+    private final Map<String, Product> productMap;
 
     public ProductCatalog() {
         productMap = new HashMap<>();

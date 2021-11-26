@@ -5,7 +5,7 @@ public class Temperature {
     private Unit unit;
 
     public enum Unit {
-        CELSIUS, FAHRENHEIT, KELVIN;
+        CELSIUS
     }
 
     public Temperature(double value, Unit unit) {

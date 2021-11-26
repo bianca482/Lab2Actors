@@ -29,7 +29,7 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
         boolean isPlayingMovie;
 
         public ControlBlinds(Weather weather) {
-            if (playingMovie.isPresent()){
+            if (playingMovie.isPresent()) {
                 isPlayingMovie = playingMovie.get();
             }
             this.weather = weather;
@@ -87,7 +87,7 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
                     isOpen = false;
                     getContext().getLog().info("Blinds reading movie is running");
                     getContext().getLog().info("Blinds closed");
-                    // No movie is running: Open blinds
+                // No movie is running: Open blinds
                 } else {
                     isOpen = true;
                     getContext().getLog().info("Blinds reading no movie is running");
@@ -96,6 +96,7 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
             }
         }
 
+        // Kein Wetter? Nur isPlayingMovie berücksichtigen
         // If a movie is playing the blinds are closed.
         else if (b.isPlayingMovie) {
             isOpen = false;
@@ -107,6 +108,7 @@ public class Blinds extends AbstractBehavior<Blinds.BlindsCommand> {
 
     private Blinds onPostStop() {
         getContext().getLog().info("Blinds actor stopped");
+
         return this;
     }
 }
