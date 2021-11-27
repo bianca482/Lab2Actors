@@ -48,7 +48,7 @@ Zudem kann der *AC* manuell ein- und ausgeschaltet werden. Außerdem kann der Us
 abspielen sowie die Temperatur und das Wetter manuell setzen.
 - #### Eingesetzte Interaktions-Pattern
 Das *UI* kennt alle Aktoren, die vom User direkt angesprochen werden können. Dies sind 
-der *Fridge*, *AC*, *MediaStation*, *TemperatureSensor* und "WeatherSensor". Die Nachrichten werden
+der *Fridge*, *AC*, *MediaStation*, *TemperatureSensor* und *WeatherSensor*. Die Nachrichten werden
 jeweils über das "Fire and Forget"-Pattern verschickt.
 
 
