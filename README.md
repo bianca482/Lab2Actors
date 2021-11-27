@@ -46,7 +46,7 @@ Produkte zu bestellen, zu konsumieren, sowie auch die Produkte, die sich aktuell
 im Kühlschrank befinden, als auch eine Historie der Bestellungen ausgeben zu lassen.
 Zudem kann der "AC" manuell ein- und ausgeschaltet werden. Außerdem kann der User Filme
 abspielen als auch die Temperatur und das Wetter manuell setzen.
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Das "UI" kennt alle Aktoren, die vom User direkt angesprochen werden können. Dies sind 
 der "Fridge", "AC", "MediaStation", "TemperatureSensor" und "WeatherSensor". Die Nachrichten werden
 jeweils über das "Fire and Forget"-Pattern verschickt.
@@ -54,7 +54,7 @@ jeweils über das "Fire and Forget"-Pattern verschickt.
 
 ### 2.2 MediaStation
 Über die "MediaStation" kann ein Film abgespielt werden. 
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Diese schickt nach dem "Fire and Forget"-Ansatz den "Blinds" Nachrichten. 
 Dabei wird den "Blinds" mitgeteilt, ob aktuell gerade ein Film läuft oder nicht.
 
@@ -64,7 +64,7 @@ Der "TemperatureSimulator" schickt sich prinzipiell nach einem selbstgewählten
 Timeout immer selbst Nachrichten. Wenn das Timeout erreicht wurde, wird
 die Temperatur um einen zufälligen Wert im Bereich von -1 bis +1 Grad erhöht/verringert
 und die neue Temperatur dem "TemperatureSensor" übermittelt.
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Um diesen "TemperatureSimulator" implementieren zu können, wurde das Interaktions-Pattern 
 "Scheduling messages to self" verwendet. Die Kommunikation zwischen diesem Simulator 
 und dem Sensor erfolgt dabei über das Pattern "Fire and Forget". 
@@ -73,7 +73,7 @@ Der Simulator kennt daher den Sensor und pushed die neue Temperatur einfach auf 
 
 ### 2.4 TemperatureSensor
 Bekommt vom "TemperaturSimulator" oder vom "UI" eine Temperatur.
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Der "TemperatureSensor" kennt nur den "AC" und schickt diesem nach dem
 Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur.
 
@@ -81,15 +81,15 @@ Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur.
 ### 2.5 AC
 Der "AC" erhält Nachrichten vom "TemperatureSensor" und schaltet sich je nach Temperatur
 ein- bzw. aus. Zusätzlich kann dieser Actor auch von außen komplett ausgeschalten werden.
-Per Default läuft der "AC" zwar, ist aber auf Standby geschalten (kühlt nicht).
-#### Kommunikation und eingesetzte Interaktions-Pattern
+Per Default läuft der "AC" zwar, ist aber auf Standby geschalten (= kühlt nicht).
+#### Eingesetzte Interaktions-Pattern
 Kennt keinen anderen Actor. 
 
 
 ### 2.6 WeatherSimulator
 Bei dem "WeatherSimulator" verhält es sich genau gleich wie beim "TemperatureSimulator", nur 
 mit dem Unterschied, dass dieser Simulator zufällig ein Wetter generiert.
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Auch hier wurde das Pattern "Scheduling messages to self" implementiert,
 damit in einem Intervall immer wieder ein neues Wetter generiert wird. Das Wetter
 wird wieder nach dem "Fire and Forget"-Ansatz dem "WeatherSensor" weitergeschickt.
@@ -97,7 +97,7 @@ wird wieder nach dem "Fire and Forget"-Ansatz dem "WeatherSensor" weitergeschick
 
 ### 2.7 WeatherSensor
 Bekommt vom "WeatherSimulator" ein Wetter.
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Der "WeatherSensor" kennt die "Blinds" und pushed das aktuelle Wetter
 auf die "Blinds" (= "Fire and Forget").
 
@@ -106,7 +106,7 @@ auf die "Blinds" (= "Fire and Forget").
 Die "Blinds" bekommen von der "MediaStation" und dem "WeatherSensor" Nachrichten 
 zugeschickt. Je nachdem, welche Werte übermittelt wurden, ändert sich der Öffnungszustand 
 der "Blinds".
-#### Kommunikation und eingesetzte Interaktions-Pattern
+#### Eingesetzte Interaktions-Pattern
 Kennt keinen anderen Aktor.
 
 
@@ -121,10 +121,10 @@ geprüft haben, ob die Bestellung von ihrer Seite aus durchgeführt werden kann.
 Ist die Bestellung möglich, wird ein "Per session child Actor" namens "OrderProcessor" 
 erstellt, welcher die Bestellung abschließt. 
 
-- #### 2.9.1 WeightSensor und SpaceSensor
+#### 2.9.1 WeightSensor und SpaceSensor
 Beide Sensoren bekommen jeweils einen Request vom "Fridge", bearbeiten die Anfrage und 
 schicken dem "Fridge" eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen.
-- #### 2.9.2 OrderProcessor
+#### 2.9.2 OrderProcessor
 Wird als "Per session child Actor" vom "Fridge" erstellt und erhält auf diesen entsprechend
 auch eine Referenz. Er erstellt eine passende Rechnung, welche er dem "Fridge" zurückschickt.
 
