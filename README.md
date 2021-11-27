@@ -1,17 +1,28 @@
 # Lab 2 (Actor-based Home Automation)
 
-#### Bianca
-
-Architekturentscheidungen begründen (inkl. wieso kein Blackboard Pattern aber auch wieso es gut gewesen wäre)
-
-Domain Model einfügen (wie Aktoren miteinander kommunizieren + Java Classes)
-
-Erklärung, wie Kommunikation zwischen Aktoren funktioniert + wer mit wem kommuniziert/ eigene Aktoren erstellt
-- beinhaltet Interaction Patterns (wo wir welche verwendet haben)
-
--------------------------------------------------------------------------------------
+Bei diesem Projekt handelt es sich um ein mit Akka implementiertes Home Automation System.
+Zunächst wird die grundlegende Architektur vorgestellt. Anschließend wird näher auf die 
+jeweiligen Actors und deren Interaktionsmuster mit den anderen Actors des Systems eingegangen.
+Anschließend folgt die Vorstellung der verwendeten Domänenobjekten, sowie eine Nutzungsanleitung
+inklusive beispielhafte Testfälle.
 
 ## 1. Architektur
+Die im Projekt verwendete Architektur beruht auf den auf der Akka-Homepage beschriebenen Vorgehensweise.
+Dabei hat jeder Actor ein bestimmtes Verhalten, welches durch Commands beschrieben wird. Ein Actor
+hat ein jeweils direkt in der Klasse definiertes Interface was den Vorteil hat, auf einen Blick 
+sehen zu können, welches Command zu welchem Actor gehört. Die Commands implementieren jeweils dieses
+Interface und können daher immer dem jeweiligen Actor zugeordnet werden.
+Wenn sich der Zustand eines Actors verändert, ändert sich auch sein Verhalten. Wenn ein Gerät beispielsweise 
+komplett ausgeschalten wird, d.h. von der Stromversorgung getrennt wird, kann es nur noch 
+ein Command entgegennehmen; nämlich sich wieder einzuschalten.
+
+In diesem Projekt werden alle Actors im "HomeAutomationController" initialisiert, kommunizieren aber sonst
+direkt miteinander. Das Blackboard-Pattern wäre eine gute Möglichkeit gewesen, die Actors 
+voneinander zu entkoppeln. Dabei könnten alle Actors ihre Nachrichten direkt an das Blackboard 
+schicken, welches wiederrum die Nachrichten an den gewünschten Empfänger weiterleitet. 
+Da jedoch der Großteil der Applikation bereits vor der Vorstellung des Blackboard-Patterns 
+implementiert wurde, erwies sich der Aufwand als zu groß, um dieses nachträglich fristgerecht
+einbauen zu können.
 
 ## 2. Verwendete Actors und deren Kommunikation
 Im Folgenden werden die verschiedenen Actors des Systems mitsamt
@@ -147,15 +158,6 @@ Das "Weather" ist ein einfaches Enum, welches aktuell nur aus "sunny" und "cloud
 als Enum implementiert, da keine weiteren Attribute notwendig sind und auf diese Art und Weise
 auch nachträglich leicht weitere Wetterzustände gespeichert werden könnten.
 
-
----------------------------------------------------------------------------
-#### Ilona
-
-Rules + Functionality erklären (welche Testfälle wir ausprobiert haben, welches Device wann wie reagiert)
-
-Erklärung, wie Befehle in UI eingegeben werden müssen
-
----------------------------------------------------------------------------
 ## 3. Verwendung Applikation
 
 Für die Nutzung der Applikation wird Java Version 15 oder höher benötigt.
