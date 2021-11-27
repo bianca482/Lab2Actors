@@ -1,6 +1,6 @@
 # Lab 2 (Actor-based Home Automation)
 
-Bei diesem Projekt handelt es sich um ein mit Akka implementiertes Home Automation System.
+Bei diesem Projekt handelt es sich um ein mit **Akka** implementiertes Home Automation System.
 Zunächst wird die grundlegende Architektur vorgestellt. Anschließend wird näher auf die 
 jeweiligen Actors und deren Interaktionsmuster mit den anderen Actors des Systems eingegangen.
 Anschließend folgt die Vorstellung der verwendeten Domänenobjekten, sowie eine Nutzungsanleitung
@@ -16,8 +16,8 @@ Wenn sich der Zustand eines Actors verändert, ändert sich auch sein Verhalten.
 komplett ausgeschalten wird, d.h. von der Stromversorgung getrennt wird, kann es nur noch 
 ein Command entgegennehmen; nämlich sich wieder einzuschalten.
 
-In diesem Projekt werden alle Actors im "HomeAutomationController" initialisiert, kommunizieren aber sonst
-direkt miteinander. Das Blackboard-Pattern wäre eine gute Möglichkeit gewesen, die Actors 
+In diesem Projekt werden alle Actors im *HomeAutomationController* initialisiert, kommunizieren aber sonst
+direkt miteinander. Das **Blackboard-Pattern** wäre eine gute Möglichkeit gewesen, die Actors 
 voneinander zu entkoppeln. Dabei könnten alle Actors ihre Nachrichten direkt an das Blackboard 
 schicken, welches wiederrum die Nachrichten an den gewünschten Empfänger weiterleitet. 
 Da jedoch der Großteil der Applikation bereits vor der Vorstellung des Blackboard-Patterns 
@@ -25,136 +25,137 @@ implementiert wurde, erwies sich der Aufwand als zu groß, um dieses nachträgli
 einbauen zu können.
 
 ## 2. Verwendete Actors und deren Kommunikation
-Im Folgenden werden die verschiedenen Actors des Systems mitsamt
-ihrer Kommunikation beschrieben. Folgende Abbildung bietet
+Im diesem Abschnitt werden die verschiedenen Actors des Systems mitsamt
+ihrer Kommunikation beschrieben. Die folgende Abbildung bietet
 einen Überblick darüber, welche Actors es gibt und wer mit wem kommuniziert.
 
 <img src="src/main/resources/Lab2_Actors_Communication_v4.jpg" alt="Kommunikation Actors"/>
 
-In der Abbildung ist ersichtlich, dass das System über die Klasse "HomeAutomationSystem"
-gestartet wird. Diese erstellt einen "HomeAutomationController", welcher
-alle Actors des Systems erstellt. Der "HomeAutomationController" schickt
-außerdem eine Nachricht an den "UI"-Actor, damit dieser einen neuen Thread mit
+In der Abbildung ist ersichtlich, dass das System über die Klasse *HomeAutomationSystem*
+gestartet wird. Diese erstellt einen *HomeAutomationController*, welcher
+alle Actors des Systems erstellt. Der *HomeAutomationController* schickt
+außerdem eine Nachricht an den *UI*-Actor, damit dieser einen neuen Thread mit
 startet und der User somit Befehle eingeben kann.
 
 ### 2.1 UI
-Das "UI" nimmt die Anfragen des Users entgegen und sendet diese an die
+Das *UI* nimmt die Anfragen des Users entgegen und sendet diese an die
 entsprechenden Actors weiter.
 
-Über das "UI" ist es somit z.B. möglich, den Kühlschrank anzusprechen und somit
+Über das *UI* ist es somit z.B. möglich, den *Fridge* anzusprechen und somit
 Produkte zu bestellen, zu konsumieren, sowie auch die Produkte, die sich aktuell
 im Kühlschrank befinden, als auch eine Historie der Bestellungen ausgeben zu lassen.
-Zudem kann der "AC" manuell ein- und ausgeschaltet werden. Außerdem kann der User Filme
-abspielen als auch die Temperatur und das Wetter manuell setzen.
-#### Eingesetzte Interaktions-Pattern
-Das "UI" kennt alle Aktoren, die vom User direkt angesprochen werden können. Dies sind 
-der "Fridge", "AC", "MediaStation", "TemperatureSensor" und "WeatherSensor". Die Nachrichten werden
+Zudem kann der *AC* manuell ein- und ausgeschaltet werden. Außerdem kann der User Filme
+abspielen sowie die Temperatur und das Wetter manuell setzen.
+- #### Eingesetzte Interaktions-Pattern
+Das *UI* kennt alle Aktoren, die vom User direkt angesprochen werden können. Dies sind 
+der *Fridge*, *AC*, *MediaStation*, *TemperatureSensor* und "WeatherSensor". Die Nachrichten werden
 jeweils über das "Fire and Forget"-Pattern verschickt.
 
 
 ### 2.2 MediaStation
-Über die "MediaStation" kann ein Film abgespielt werden. 
-#### Eingesetzte Interaktions-Pattern
-Diese schickt nach dem "Fire and Forget"-Ansatz den "Blinds" Nachrichten. 
-Dabei wird den "Blinds" mitgeteilt, ob aktuell gerade ein Film läuft oder nicht.
+Über die *MediaStation* kann ein Film abgespielt werden. 
+- #### Eingesetzte Interaktions-Pattern
+Diese schickt nach dem "Fire and Forget"-Ansatz den *Blinds* Nachrichten. 
+Dabei wird den *Blinds* mitgeteilt, ob aktuell gerade ein Film läuft oder nicht.
 
 
 ### 2.3 TemperatureSimulator
-Der "TemperatureSimulator" schickt sich prinzipiell nach einem selbstgewählten
+Der *TemperatureSimulator* schickt sich nach einem selbstgewählten
 Timeout immer selbst Nachrichten. Wenn das Timeout erreicht wurde, wird
 die Temperatur um einen zufälligen Wert im Bereich von -1 bis +1 Grad erhöht/verringert
-und die neue Temperatur dem "TemperatureSensor" übermittelt.
-#### Eingesetzte Interaktions-Pattern
-Um diesen "TemperatureSimulator" implementieren zu können, wurde das Interaktions-Pattern 
+und die neue Temperatur dem *TemperatureSensor* übermittelt.
+- #### Eingesetzte Interaktions-Pattern
+Um diesen *TemperatureSimulator* implementieren zu können, wurde das Interaktions-Pattern 
 "Scheduling messages to self" verwendet. Die Kommunikation zwischen diesem Simulator 
 und dem Sensor erfolgt dabei über das Pattern "Fire and Forget". 
 Der Simulator kennt daher den Sensor und pushed die neue Temperatur einfach auf den Sensor.
 
 
 ### 2.4 TemperatureSensor
-Bekommt vom "TemperaturSimulator" oder vom "UI" eine Temperatur.
-#### Eingesetzte Interaktions-Pattern
-Der "TemperatureSensor" kennt nur den "AC" und schickt diesem nach dem
+Bekommt vom *TemperaturSimulator* oder vom *UI* eine Temperatur zugeschickt.
+- #### Eingesetzte Interaktions-Pattern
+Der *TemperatureSensor* kennt nur den *AC* und schickt diesem nach dem
 Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur.
 
 
 ### 2.5 AC
-Der "AC" erhält Nachrichten vom "TemperatureSensor" und schaltet sich je nach Temperatur
+Der *AC* erhält Nachrichten vom *TemperatureSensor* und schaltet sich je nach Temperatur
 ein- bzw. aus. Zusätzlich kann dieser Actor auch von außen komplett ausgeschalten werden.
-Per Default läuft der "AC" zwar, ist aber auf Standby geschalten (= kühlt nicht).
-#### Eingesetzte Interaktions-Pattern
+Per Default läuft der *AC* zwar, ist aber auf Standby geschalten (= kühlt nicht).
+Ist dieser Actor komplett ausgeschalten, ändert sich sein Verhalten. Er kann dann nur noch
+ein einzelnes Command entgegennehmen, und zwar, ob er wieder eingeschalten werden soll.
+- #### Eingesetzte Interaktions-Pattern
 Kennt keinen anderen Actor. 
 
 
 ### 2.6 WeatherSimulator
-Bei dem "WeatherSimulator" verhält es sich genau gleich wie beim "TemperatureSimulator", nur 
+Bei dem *WeatherSimulator* verhält es sich genau gleich wie beim *TemperatureSimulator*, nur 
 mit dem Unterschied, dass dieser Simulator zufällig ein Wetter generiert.
-#### Eingesetzte Interaktions-Pattern
+- #### Eingesetzte Interaktions-Pattern
 Auch hier wurde das Pattern "Scheduling messages to self" implementiert,
 damit in einem Intervall immer wieder ein neues Wetter generiert wird. Das Wetter
-wird wieder nach dem "Fire and Forget"-Ansatz dem "WeatherSensor" weitergeschickt.
+wird wieder nach dem "Fire and Forget"-Ansatz dem *WeatherSensor* weitergeschickt.
 
 
 ### 2.7 WeatherSensor
-Bekommt vom "WeatherSimulator" ein Wetter.
-#### Eingesetzte Interaktions-Pattern
-Der "WeatherSensor" kennt die "Blinds" und pushed das aktuelle Wetter
-auf die "Blinds" (= "Fire and Forget").
+Bekommt vom *WeatherSimulator* ein Wetter.
+- #### Eingesetzte Interaktions-Pattern
+Der *WeatherSensor* kennt die *Blinds* und pushed das aktuelle Wetter
+auf die *Blinds* (= "Fire and Forget").
 
 
 ### 2.8 Blinds
-Die "Blinds" bekommen von der "MediaStation" und dem "WeatherSensor" Nachrichten 
+Die *Blinds* bekommen von der *MediaStation* und dem *WeatherSensor* Nachrichten 
 zugeschickt. Je nachdem, welche Werte übermittelt wurden, ändert sich der Öffnungszustand 
-der "Blinds".
-#### Eingesetzte Interaktions-Pattern
+der *Blinds*.
+- #### Eingesetzte Interaktions-Pattern
 Kennt keinen anderen Aktor.
 
 
 ### 2.9 Fridge
-Der "Fridge" hat selber zwei eigene Sensoren, den "WeightSensor" und den "SpaceSensor".
+Der *Fridge* hat selber zwei eigene Sensoren, den *WeightSensor* und den *SpaceSensor*.
 Diese werden beim Erstellen des Kühlschranks initialisiert und erhalten somit auch
 die maximale Anzahl an Produkten bzw. das mögliche Maximalgewicht. Im Falle der 
-Bearbeitung einer "OrderProduct"-Anfrage vom "UI" wird dabei zunächst bei
+Bearbeitung einer "OrderProduct"-Anfrage vom *UI* wird dabei zunächst bei
 den beiden Sensoren angefragt, ob vom Gewicht bzw. von der Anzahl der Produkten
-her die Bestellung durchgeführt werden kann. Der "Fridge" wartet, bis beide Sensoren
+her die Bestellung durchgeführt werden kann. Der *Fridge* wartet, bis beide Sensoren
 geprüft haben, ob die Bestellung von ihrer Seite aus durchgeführt werden kann.
-Ist die Bestellung möglich, wird ein "Per session child Actor" namens "OrderProcessor" 
+Ist die Bestellung möglich, wird ein "Per session child Actor" namens *OrderProcessor* 
 erstellt, welcher die Bestellung abschließt. 
 
 #### 2.9.1 WeightSensor und SpaceSensor
-Beide Sensoren bekommen jeweils einen Request vom "Fridge", bearbeiten die Anfrage und 
-schicken dem "Fridge" eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen.
+Beide Sensoren bekommen jeweils einen Request vom *Fridge*, bearbeiten die Anfrage und 
+schicken dem *Fridge* eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen.
 #### 2.9.2 OrderProcessor
-Wird als "Per session child Actor" vom "Fridge" erstellt und erhält auf diesen entsprechend
-auch eine Referenz. Er erstellt eine passende Rechnung, welche er dem "Fridge" zurückschickt.
+Wird als "Per session child Actor" vom *Fridge* erstellt und erhält auf diesen entsprechend
+auch eine Referenz. Er erstellt eine passende Rechnung, welche er dem *Fridge"* zurückschickt.
 
----------------------------------------------------------------------------
 ## 3. Domain Model
 Neben den soeben beschriebenen Actors, kamen auch normale Java Klassen zum Einsatz.
 
 <img src="src/main/resources/domain_model.png" alt="Domänenmodell"/>
 
-Wie in der obigen Abbildung ersichtlich ist, wurde eine eigene Klasse für die "Temperature" erstellt
+Wie in der obigen Abbildung ersichtlich ist, wurde eine eigene Klasse für die *Temperature* erstellt
 Dies hat den Sinn, zusätzlich zur jewiligen Grad-Anzahl auch die entsprechende Einheit
-speichern zu können. Hierfür hat die "Temperature" eine interne Enum-Klasse, welche aktuell nur
+speichern zu können. Hierfür hat die *Temperature* eine interne Enum-Klasse, welche aktuell nur
 Celsius enthält. Diese könnte auch durch andere Maßeinheiten, wie beispielsweise Kelvin oder
 Fahrenheit, erweitert werden.
 
-Ein "Product" kann bestellt oder konsumiert werden. Jedes "Product" hat einen Namen, einen
-Preis und ein Gewicht. Der "ProductCatalog" speichert alle möglichen Produkte, die in einem
-"Fridge" gespeichert werden können. Jeder Fridge erstellt sich einen "ProductCatalog".
-Dies Klasse wurde eingefügt, um nicht extra bei jedem Produkt, das im "UI" bestellt oder
+Ein *Product* kann bestellt oder konsumiert werden. Jedes *Product* hat einen Namen, einen
+Preis und ein Gewicht. Der *ProductCatalog"* speichert alle möglichen Produkte, die in einem
+*Fridge* gespeichert werden können. Jeder Fridge erstellt sich einen *ProductCatalog*.
+Dies Klasse wurde eingefügt, um nicht extra bei jedem Produkt, das im *UI* bestellt oder
 konsumiert wird, einen Preis und ein Gewicht bereitstellen zu müssen. Die Produkte werden zu Beginn
-initialisiert und können aber im Nachhinein über das "AddProductToCatalog"-Command des "Fridge"
+initialisiert und können aber im Nachhinein über das "AddProductToCatalog"-Command des *Fridge*
 erweitert werden.
 
-Eine "Order"-Klasse wurde erstellt, um sich einen Verlauf der Bestellungen anzeigen lassen zu können.
-Beim Erstellen einer Bestellung wird ein neues "Order"-Objekt angelegt und in einer Liste im "Fridge" gespeichert.
+Eine *Order*-Klasse wurde erstellt, um sich einen Verlauf der Bestellungen anzeigen lassen zu können.
+Beim Erstellen einer Bestellung wird ein neues *Order*-Objekt angelegt und in einer Liste im *Fridge* gespeichert.
 
-Wurde eine Bestellung erfolgreich abgeschlossen, wird ein "Receipt"-Objekt erstellt. In dieser ist nicht nur
+Wurde eine Bestellung erfolgreich abgeschlossen, wird ein *Receipt*-Objekt erstellt. In dieser ist nicht nur
 erstichtlich, was bestellt wurde, sondern auch zu welchem Zeitpunkt.
 
-Das "Weather" ist ein einfaches Enum, welches aktuell nur aus "sunny" und "cloudy" besteht. Dies wurde
+Das *Weather* ist ein einfaches Enum, welches aktuell nur aus "sunny" und "cloudy" besteht. Dies wurde
 als Enum implementiert, da keine weiteren Attribute notwendig sind und auf diese Art und Weise
 auch nachträglich leicht weitere Wetterzustände gespeichert werden könnten.
 
