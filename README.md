@@ -202,7 +202,6 @@ Die Wettersituation kann mit [sunny] auf sonnig und mit [cloudy] auf wolking ge�
 Da das Wetter über einen WeatherSimulator gesteuert wird, ist des nicht nötig, dieses Command händisch auszuführen, es wurde aber für Testzwecke implementiert.
 
 #### 3.1.5 Kühlschrank bedienen:
-
 Um den Kühlschrank zu bedienen, wurde bei der Initialisierung des Kühlschranks ein Default-Produktkatalog erstellt der folgende Artikel enthält:
 milk, cheese, yogurt, butter, chicken, coke, salad.
 Diese Produkte können bestellt und konsumiert werden. Sollten andere Produkte bestellt oder konsumiert werden wollen, können diese manuell hinzugefügt werden.
@@ -255,7 +254,6 @@ Bei den Testfällen wird davon ausgegangen, dass die Commands korrekt (ohne Tipp
 Ein Fehlerhandling für falsch eingebene Commands wurde nicht implementiert.
 
 #### 3.2.1 Users can order products at the Fridge. A successful order returns a receipt.
-
 *User möchte sechs Jogurt bestellen. Der maximale Platz und das maximal tragende Gewicht des Kühlschranks ist noch nicht erreicht.*
 - Command: f order yogurt 6
 - Resultat: Es wird 6x Joghurt bestellt und eine Bestellbestätigung ausgegeben.
@@ -279,7 +277,6 @@ Ein Fehlerhandling für falsch eingebene Commands wurde nicht implementiert.
 - Resultat: Bestellung nicht möglich, da das das Produkt nicht verfügbar ist.
 
 #### 3.2.2 Users can consume products from the Fridge.
-
 *User möchte zwei Joghurt konsumieren. Es befinden sich sechs Joghurt im Kühlschrank.*
 - Command: f consume yogurt 2
 - Resultat: Es werden zwei Joghurt aus dem Kühlschrank entfernt.
@@ -298,19 +295,16 @@ Ein Fehlerhandling für falsch eingebene Commands wurde nicht implementiert.
 - Resultat: Konsumieren nicht möglich, da das das Produkt nicht verfügbar ist.
 
 #### 3.2.3 The Fridge allows for querying the currently stored products.
-
 *User möchte sich anzeigen lassen, welche Produkte sich im Kühlschrank befinden*
 - Command: f products
 - Resultat: Es wird die Anzahl aller Produkten ausgegeben, welche sich im Kühlschrank befinden.
 
 #### 3.2.4 The Fridge allows for querying the history of orders.
-
 *User möchte sich eine Historie der Bestellungen anzeigen lassen*
 - Command: f orders
 - Resultat: Es werden alle erfolgreich durchgeführten Bestellungen ausgegeben.
 
 #### 3.2.5 Users can play movies at the media station.
-
 *User möchte einen Film abspielen lassen. Es läuft noch kein anderer Film.*
 - Command: m true
 - Resultat: Die Media Station läuft und die Blinds werden im Gegenzug geschlossen.
@@ -358,8 +352,6 @@ Ein Fehlerhandling für falsch eingebene Commands wurde nicht implementiert.
 - Bestätigte Regel: If the weather is not sunny the blinds will open (unless a movie is playing).
 
 *Das Wetter ändert sich von sonnig auf bewölkt und es läuft ein Film.*
-- Command: m ture, w cloudy
+- Command: m true, w cloudy
 - Resultat: Die Blinds bleiben geschlossen.
 - Bestätigte Regel: If the weather is not sunny the blinds will open (unless a movie is playing).
-
-
