@@ -49,14 +49,20 @@ abspielen sowie die Temperatur und das Wetter manuell setzen.
 - #### Eingesetzte Interaktions-Pattern
 Das *UI* kennt alle Aktoren, die vom User direkt angesprochen werden können. Dies sind 
 der *Fridge*, *AC*, *MediaStation*, *TemperatureSensor* und *WeatherSensor*. Die Nachrichten werden
-jeweils über das "Fire and Forget"-Pattern verschickt.
+rein technisch gesehen jeweils über das "Fire and Forget"-Pattern verschickt, da das *UI* lediglich die Schnittstelle zwischen
+dem User und den einzelnen Devices ist. Die Responses der Devices werden als Konsolenlogs ausgegeben,
+was eine Art von "Request-Response" darstellt, da der User eine Nachricht von den Devices bekommt, diese
+aber nicht direkt über den *UI*-Actor abgefangen werden. 
 
 
 ### 2.2 MediaStation
 Über die *MediaStation* kann ein Film abgespielt werden. 
 - #### Eingesetzte Interaktions-Pattern
 Diese schickt nach dem "Fire and Forget"-Ansatz den *Blinds* Nachrichten. 
-Dabei wird den *Blinds* mitgeteilt, ob aktuell gerade ein Film läuft oder nicht.
+Dabei wird den *Blinds* mitgeteilt, ob aktuell gerade ein Film läuft oder nicht. Dieses Pattern wurde
+verwendet, da die *MediaStation* keine Antwort von den *Blinds* braucht und auch nicht wissen muss, 
+ob diese ihre Anfrage erhalten hat. Die *MediaStation* gibt den *Blinds* lediglich Bescheid, ob gerade
+ein Film läuft oder nicht - was mit diesen Informationen passieren soll, entscheiden die *Blinds*.
 
 
 ### 2.3 TemperatureSimulator
@@ -66,16 +72,22 @@ die Temperatur um einen zufälligen Wert im Bereich von -1 bis +1 Grad erhöht/v
 und die neue Temperatur dem *TemperatureSensor* übermittelt.
 - #### Eingesetzte Interaktions-Pattern
 Um diesen *TemperatureSimulator* implementieren zu können, wurde das Interaktions-Pattern 
-"Scheduling messages to self" verwendet. Die Kommunikation zwischen diesem Simulator 
-und dem Sensor erfolgt dabei über das Pattern "Fire and Forget". 
-Der Simulator kennt daher den Sensor und pushed die neue Temperatur einfach auf den Sensor.
+"Scheduling messages to self" verwendet. Dieses Pattern ermöglicht es einem Actor sich 
+selbst Nachrichten zu schicken. Dafür wird ein Timeout definiert, nach dessen Ablauf die 
+Nachricht versendet wird. 
+Die Kommunikation zwischen diesem Simulator und dem Sensor erfolgt dabei über das Pattern 
+"Fire and Forget". Der Simulator kennt daher den Sensor und pushed die neue Temperatur einfach 
+auf den Sensor. Es wurde auf dieses Pattern zurückgegriffen, weil der Simulator nichts anderes tut, 
+als die Temperatur zu erzeugen und es ihm auch egal ist, was der Sensor dann damit macht. 
 
 
 ### 2.4 TemperatureSensor
 Bekommt vom *TemperaturSimulator* oder vom *UI* eine Temperatur zugeschickt.
 - #### Eingesetzte Interaktions-Pattern
 Der *TemperatureSensor* kennt nur den *AC* und schickt diesem nach dem
-Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur.
+Interaktions-Pattern "Fire and Forget" immer die neue aktuelle Temperatur. Das "Fire and Forget"-
+Pattern wurde wieder verwendet, da der *TemperatureSensor* nicht wissen muss, wie und ob 
+der *AC* auf die Nachricht reagiert.
 
 
 ### 2.5 AC
@@ -125,10 +137,18 @@ erstellt, welcher die Bestellung abschließt.
 
 #### 2.9.1 WeightSensor und SpaceSensor
 Beide Sensoren bekommen jeweils einen Request vom *Fridge*, bearbeiten die Anfrage und 
-schicken dem *Fridge* eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen.
+schicken dem *Fridge* eine Antwort zurück. Hierbei wurde auf das "Request and Response"-Interaktionspattern zurückgegriffen,
+weil der *Fridge* wissen muss, dass die Anfragen auch von den Sensoren bearbeitet wurden. 
+Er braucht die Antwort von beiden, um z.B. eine Bestellung weiter bearbeiten zu können.
 #### 2.9.2 OrderProcessor
 Wird als "Per session child Actor" vom *Fridge* erstellt und erhält auf diesen entsprechend
 auch eine Referenz. Er erstellt eine passende Rechnung, welche er dem *Fridge"* zurückschickt.
+Dieser Actor wurde als "Per session child Actor" implementiert, da ein Bestellvorgang immer
+von mehreren Interaktionen mit anderen Actors (= Weight- & SpaceSensor) abhängt. Er wird für jeden
+Bestellvorgang neu erstellt, da dieser Actor immer mit dem aktuellen Order initialisiert wird.
+Um den *Fridge* etwas leichter/ schmaler zu gestalten, wäre es vermutlich besser gewesen, dem *OrderProcessor*
+beide Sensoren mitzugeben. Dies hätte  den Vorteil gehabt, den gesamten Bestellvorgang über diesen Actor abwickeln zu können.
+In unserem Fall macht dieser Actor nichts anderes, als das Receipt zu erstellen.
 
 ## 3. Domain Model
 Neben den soeben beschriebenen Actors, kamen auch normale Java Klassen zum Einsatz.
