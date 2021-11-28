@@ -160,9 +160,9 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
         Product product = productCatalog.getProductMap().get(message.productToConsume);
 
-        // Prüfen, ob das Produkt potentiell konsumiert werden könnte
+        // Prüfen, ob sich das Produkt im Kühlschrank befindet
         if (!productAmountMap.containsKey(product)) {
-            getContext().getLog().info("No {} to consume available. Please add the product to product catalog and order it.", message.productToConsume);
+            getContext().getLog().info("No {} to consume available. You must order it before consuming.", message.productToConsume);
             return this;
         }
 
@@ -182,7 +182,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
             }
             getContext().getLog().info("Successfully consumed {}", product.getName());
         } else {
-            getContext().getLog().info("There are no {} of {} in the fridge.", message.amount, product.getName());
+            getContext().getLog().info("{} {} not in the fridge.", message.amount, product.getName());
         }
         return this;
     }
