@@ -173,7 +173,7 @@ Eine *Order*-Klasse wurde erstellt, um sich einen Verlauf der Bestellungen anzei
 Beim Erstellen einer Bestellung wird ein neues *Order*-Objekt angelegt und in einer Liste im *Fridge* gespeichert.
 
 Wurde eine Bestellung erfolgreich abgeschlossen, wird ein *Receipt*-Objekt erstellt. In dieser ist nicht nur
-erstichtlich, was bestellt wurde, sondern auch zu welchem Zeitpunkt.
+ersichtlich, was bestellt wurde, sondern auch zu welchem Zeitpunkt.
 
 Das *Weather* ist ein einfaches Enum, welches aktuell nur aus "sunny" und "cloudy" besteht. Dies wurde
 als Enum implementiert, da keine weiteren Attribute notwendig sind und auf diese Art und Weise
@@ -181,7 +181,8 @@ auch nachträglich leicht weitere Wetterzustände gespeichert werden könnten.
 
 ## 3. Verwendung Applikation
 
-Für die Nutzung der Applikation wird Java Version 15 oder höher benötigt.
+Für die Nutzung der Applikation wird Java Version 15 oder höher benötigt. Darauf ist zu achten, dass die Version in den Project Settings unter Modules hinterlegt ist:
+<img src="src/main/resources/Project_Settings.png" alt="Project Settings"/>
 
 ### 3.1 Bedienung UI
 Um die Applikation zu bedienen, muss zuerst das HomeAutomationSystem gestartet werden.
