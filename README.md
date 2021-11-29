@@ -17,7 +17,9 @@ komplett ausgeschalten wird, d.h. von der Stromversorgung getrennt wird, kann es
 ein Command entgegennehmen; nämlich sich wieder einzuschalten.
 
 In diesem Projekt werden alle Actors im *HomeAutomationController* initialisiert, kommunizieren aber sonst
-direkt miteinander. Das **Blackboard-Pattern** wäre eine gute Möglichkeit gewesen, die Actors 
+direkt miteinander. Der *HomeAutomationController* ist in diesem Fall ein Guardian, da er alle
+anderen Actors initialisiert und diese auch beendet werden, wenn der Controller beendet wird.
+Das **Blackboard-Pattern** wäre eine gute Möglichkeit gewesen, die Actors 
 voneinander zu entkoppeln. Dabei könnten alle Actors ihre Nachrichten direkt an das Blackboard 
 schicken, welches wiederrum die Nachrichten an den gewünschten Empfänger weiterleitet. 
 Da jedoch der Großteil der Applikation bereits vor der Vorstellung des Blackboard-Patterns 
