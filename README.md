@@ -275,104 +275,104 @@ Bei den Testfällen wird davon ausgegangen, dass die Commands korrekt (ohne Tipp
 Ein Fehlerhandling für falsch eingegebene Commands wurde nicht implementiert.
 
 #### 3.2.1 Users can order products at the Fridge. A successful order returns a receipt.
-*User möchte sechs Jogurt bestellen. Der maximale Platz und das maximal tragende Gewicht des Kühlschranks ist noch nicht erreicht.*
+User möchte sechs Jogurt bestellen. Der maximale Platz und das maximal tragende Gewicht des Kühlschranks ist noch nicht erreicht.
 - Command: *f order yogurt 6*
 - Resultat: Es wird 6x Joghurt bestellt und eine Bestellbestätigung ausgegeben.
 
-*User möchte 101x Joghurt bestellen. Der maximale Platz des Kühlschranks würde dadurch überschritten werden, das maximal tragende Gewicht jedoch nicht..*
+User möchte 101x Joghurt bestellen. Der maximale Platz des Kühlschranks würde dadurch überschritten werden, das maximal tragende Gewicht jedoch nicht.
 - Command: *f order yogurt 101*
 - Resultat: Die Bestellung kann nicht durchgeführt werden
 - Bestätigte Regel: The Fridge can only process an order if there is enough room in the fridge, i.e., the contained products and newly order products do not exceed the maximum number of storable products.
 
-*User möchte 3x Rindfleisch bestellen. Das maximal tragende Gewicht des Kühlschranks würde dadurch überschritten werden, der maximale Platz jedoch nicht.*
+User möchte 3x Rindfleisch bestellen. Das maximal tragende Gewicht des Kühlschranks würde dadurch überschritten werden, der maximale Platz jedoch nicht.
 - Command: *f order beef 3*
 - Ergebnis: Rückmeldung, dass das Produkt Yoghurt nicht geordert werden kann, weil das maximale Gewicht sonst überschritten wird.
 - Bestätigte Regel: The Fridge can only process an order if the weight of the sum of the contained products and newly order products does not exceed its maximum weight capacity.
 
-*User möchte Produkt bestellen, welches sich nicht im Kühlschrank befindet.*
+User möchte Produkt bestellen, welches sich nicht im Kühlschrank befindet.
 - Command: *f order honey*
 - Resultat: Bestellung nicht möglich, da das das Produkt nicht verfügbar ist.
 
-*User möchte Produkt bestellen, welches sich nicht im Kühlschrank befindet und legt dieses somit im Produktkatalog an.*
+User möchte Produkt bestellen, welches sich nicht im Kühlschrank befindet und legt dieses somit im Produktkatalog an.
 - Command: *f catalog, honey 5.00 0.25*
 - Resultat: Bestellung nicht möglich, da das Produkt nicht verfügbar ist.
 
 #### 3.2.2 Users can consume products from the Fridge.
-*User möchte zwei Joghurt konsumieren. Es befinden sich sechs Joghurts im Kühlschrank.*
+User möchte zwei Joghurt konsumieren. Es befinden sich sechs Joghurts im Kühlschrank.
 - Command: *f consume yogurt 2*
 - Resultat: Es werden zwei Joghurts aus dem Kühlschrank entfernt.
 
-*User möchte vier Joghurts konsumieren. Es befinden sich vier Joghurts im Kühlschrank.*
+User möchte vier Joghurts konsumieren. Es befinden sich vier Joghurts im Kühlschrank.
 - Command: *f consume yogurt 4*
 - Resultat: Es werden vier Joghurts aus dem Kühlschrank entfernt und automatisch ein Joghurt nachbestellt.
 - Bestätigte Regel: If a product runs out in the fridge it is automatically ordered again.
 
-*User möchte zwei Joghurts konsumieren. Es befindet sich ein Joghurt im Kühlschrank.*
+User möchte zwei Joghurts konsumieren. Es befindet sich ein Joghurt im Kühlschrank.
 - Command: *f consume yogurt 2*
   Resultat: Konsumieren nicht möglich, da die Anzahl des gewünschten Produktes die Anzahl im Kühlschrank überschreitet.
 
-*User möchte Produkt konsumieren, welches sich nicht im Kühlschrank befindet.*
+User möchte Produkt konsumieren, welches sich nicht im Kühlschrank befindet.
 - Command: *f consume wine*
 - Resultat: Konsumieren nicht möglich, da das Produkt nicht verfügbar ist.
 
 #### 3.2.3 The Fridge allows for querying the currently stored products.
-*User möchte sich anzeigen lassen, welche Produkte sich im Kühlschrank befinden*
+User möchte sich anzeigen lassen, welche Produkte sich im Kühlschrank befinden
 - Command: *f products*
 - Resultat: Es wird die Anzahl aller Produkten ausgegeben, welche sich im Kühlschrank befinden.
 
 #### 3.2.4 The Fridge allows for querying the history of orders.
-*User möchte sich eine Historie der Bestellungen anzeigen lassen*
+User möchte sich eine Historie der Bestellungen anzeigen lassen
 - Command: *f orders*
 - Resultat: Es werden alle erfolgreich durchgeführten Bestellungen ausgegeben.
 
 #### 3.2.5 Users can play movies at the media station.
-*User möchte einen Film abspielen lassen. Es läuft noch kein anderer Film.*
+User möchte einen Film abspielen lassen. Es läuft noch kein anderer Film.
 - Command: *m true*
 - Resultat: Die Media Station läuft und die Blinds werden im Gegenzug geschlossen.
 - Bestätigte Regel: If a movie is playing the blinds are closed.
 
-*User möchte einen Film abspielen lassen. Es läuft bereits ein Film*
+User möchte einen Film abspielen lassen. Es läuft bereits ein Film
 - Command: *m true*
 - Resultat: Es kann kein weiterer Film abgespielt werden.
 - Bestätigte Regel: A new movie cannot be started if another movie is already playing.
 
-*User möchte einen laufenden Film abschalten.*
+User möchte einen laufenden Film abschalten.
 - Command: *m false*
 - Resultat: Der Film wird beendet.
 
 ### 3.2.6 AC regulation is depending on the measured temperature.
 
-*Die Temperatur ändert sich auf 21°C*
+Die Temperatur ändert sich auf 21°C
 - Command: *t 21*
 - Resultat: Die AC beginnt zu kühlen.
 - Bestätigte Regel: If the temperature is above 20°C the AC starts cooling.
   
-*Die Temperatur ändert sich auf 19°C*
+Die Temperatur ändert sich auf 19°C
 - Command: *t 19*
 - Resultat: Die AC beendet die Kühlfunktion.
 - Bestätigte Regel: If the temperature is below 20°C the AC turns off.
 
-*User möchte die AC manuell ausschalten*
+User möchte die AC manuell ausschalten
 - Command: *a false*
 - Resultat: Die AC wird ausgeschaltet.
 
-*Die Temperatur ändert sich auf 17°C*
+Die Temperatur ändert sich auf 17°C
 - Command: *t 17*
 - Resultat: Die AC kann die Kühlfunktion nicht starten, da sie ausgeschaltet ist.
 
 ### 3.2.7 Blinds regulation depending on the measured weather condition.
 
-*Draußen ist es sonnig.*
+Draußen ist es sonnig.
 - Command: *w sunny*
 - Resultat: Die Blinds werden geschlossen.
 - Bestätigte Regel: If the weather is sunny the blinds will close.
 
-*Draußen ist es bewölkt und es läuft kein Film.*
+Draußen ist es bewölkt und es läuft kein Film.
 - Command: *w cloudy*
 - Resultat: Die Blinds werden geöffnet.
 - Bestätigte Regel: If the weather is not sunny the blinds will open (unless a movie is playing).
 
-*Das Wetter ändert sich von sonnig auf bewölkt und es läuft ein Film.*
+Das Wetter ändert sich von sonnig auf bewölkt und es läuft ein Film.
 - Command: *m true, w cloudy*
 - Resultat: Die Blinds bleiben geschlossen.
 - Bestätigte Regel: If the weather is not sunny the blinds will open (unless a movie is playing).
