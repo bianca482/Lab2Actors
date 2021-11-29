@@ -29,7 +29,7 @@ public class TemperatureSimulator extends AbstractBehavior<TemperatureSimulator.
         this.timers = timers;
         this.temperatureSensor = temperatureSensor;
         this.currentTemperature = new Temperature(23, Temperature.Unit.GRAD_CELSIUS);
-        this.timers.startTimerAtFixedRate(new TemperatureSimulatorCommandImpl(), Duration.ofSeconds(10));
+        this.timers.startTimerAtFixedRate(new TemperatureSimulatorCommandImpl(), Duration.ofSeconds(20));
 
         getContext().getLog().info("TemperatureSimulator started");
     }

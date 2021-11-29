@@ -71,7 +71,7 @@ public class MediaStation extends AbstractBehavior<MediaStation.MediaStationComm
 
             playingMovie = m.isPlayingMovie;
 
-            this.blinds.tell(new Blinds.ControlBlinds(m.isPlayingMovie.get()));
+            this.blinds.tell(new Blinds.ControlBlindsMovie(m.isPlayingMovie.get()));
         } else {
             getContext().getLog().info("Cannot play new movie because another movie is already playing.");
         }

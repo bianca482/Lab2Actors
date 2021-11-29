@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import at.fhv.sysarch.lab2.homeautomation.devices.*;
+import at.fhv.sysarch.lab2.homeautomation.devices.fridge.Fridge;
 import at.fhv.sysarch.lab2.homeautomation.domain.Temperature;
 import at.fhv.sysarch.lab2.homeautomation.domain.Weather;
 

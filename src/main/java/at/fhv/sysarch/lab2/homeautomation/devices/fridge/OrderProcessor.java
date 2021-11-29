@@ -1,4 +1,4 @@
-package at.fhv.sysarch.lab2.homeautomation.devices;
+package at.fhv.sysarch.lab2.homeautomation.devices.fridge;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

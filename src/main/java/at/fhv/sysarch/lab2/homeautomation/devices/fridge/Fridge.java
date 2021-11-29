@@ -1,4 +1,4 @@
-package at.fhv.sysarch.lab2.homeautomation.devices;
+package at.fhv.sysarch.lab2.homeautomation.devices.fridge;
 
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.Behavior;
@@ -119,8 +119,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private final ActorRef<SpaceSensor.SpaceSensorCommand> spaceSensor;
     private final ActorRef<WeightSensor.WeightSensorCommand> weightSensor;
     private OrderProduct lastOrderedProductMessage;
-    private AnswerFromSpaceSensor answerFromSpaceSensor;
-    private AnswerFromWeightSensor answerFromWeightSensor;
+    private boolean answerFromSpaceSensor;
+    private boolean answerFromWeightSensor;
 
     private Fridge(ActorContext<FridgeCommand> context, int maxNumberOfProducts, int maxWeightLoad, String groupId, String deviceId) {
         super(context);
@@ -197,8 +197,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
 
         Product product = productCatalog.getProductMap().get(message.productToOrder);
         //Eventuelle vorherigen Werte zurücksetzen
-        answerFromSpaceSensor = null;
-        answerFromWeightSensor = null;
+        answerFromSpaceSensor = false;
+        answerFromWeightSensor = false;
 
         //Aktuell bestelltes Produkt setzen
         lastOrderedProductMessage = message;
@@ -213,7 +213,7 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private Behavior<FridgeCommand> onAnswerFromSpaceSensor(AnswerFromSpaceSensor message) {
         getContext().getLog().info("Fridge received AnswerFromSpaceSensor. Was successful: {}", message.wasSuccessful);
 
-        this.answerFromSpaceSensor = message;
+        this.answerFromSpaceSensor = message.wasSuccessful;
         onWeightAndSpaceResponse();
         return this;
     }
@@ -221,20 +221,20 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
     private Behavior<FridgeCommand> onAnswerFromWeightSensor(AnswerFromWeightSensor message) {
         getContext().getLog().info("Fridge received AnswerFromWeightSensor. Was successful: {}", message.wasSuccessful);
 
-        this.answerFromWeightSensor = message;
+        this.answerFromWeightSensor = message.wasSuccessful;
         onWeightAndSpaceResponse();
         return this;
     }
 
     private void onWeightAndSpaceResponse() {
         //Warten, bis beide Sensoren die Rückmeldung gegeben haben
-        if (answerFromSpaceSensor == null || answerFromWeightSensor == null || lastOrderedProductMessage == null) {
+        if (!answerFromSpaceSensor || !answerFromWeightSensor || lastOrderedProductMessage == null) {
             return;
         }
 
         Product product = productCatalog.getProductMap().get(lastOrderedProductMessage.productToOrder);
 
-        if (answerFromWeightSensor.wasSuccessful && answerFromSpaceSensor.wasSuccessful) {
+        if (answerFromWeightSensor && answerFromSpaceSensor) {
             // Add product
             if (productAmountMap.containsKey(product)) {
                 //Anzahl des Produktes anpassen

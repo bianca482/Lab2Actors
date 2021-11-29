@@ -32,7 +32,7 @@ public class WeatherSimulator extends AbstractBehavior<WeatherSimulator.WeatherS
         super(context);
         this.timers = timers;
         this.weatherSensor = weatherSensor;
-        this.timers.startTimerAtFixedRate(new WeatherSimulatorCommandImpl(), Duration.ofSeconds(15));
+        this.timers.startTimerAtFixedRate(new WeatherSimulatorCommandImpl(), Duration.ofSeconds(35));
 
         getContext().getLog().info("WeatherSimulator started");
     }
