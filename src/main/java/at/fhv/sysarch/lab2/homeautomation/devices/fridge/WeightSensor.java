@@ -15,22 +15,14 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     //Prüft, ob das Produkt bestellt werden kann
     public static final class CanAddProduct implements WeightSensorCommand {
         double weight;
+        double currentWeight;
 
-        public CanAddProduct(double weight) {
+        public CanAddProduct(double weight, double currentWeight) {
             this.weight = weight;
+            this.currentWeight = currentWeight;
         }
     }
 
-    //Passt das aktuelle Gesamtgewicht an
-    public static final class ProductsConsumed implements WeightSensorCommand {
-        double weightLoad;
-
-        public ProductsConsumed(double weightLoad) {
-            this.weightLoad = weightLoad;
-        }
-    }
-
-    private double currentWeightLoad;
     private final double maxWeightLoad;
     private final ActorRef<Fridge.FridgeCommand> fridge;
 
@@ -50,7 +42,6 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     public Receive<WeightSensorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(WeightSensor.CanAddProduct.class, this::onWeight)
-                .onMessage(WeightSensor.ProductsConsumed.class, this::onProductsConsumed)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
@@ -58,19 +49,11 @@ public class WeightSensor extends AbstractBehavior<WeightSensor.WeightSensorComm
     private Behavior<WeightSensorCommand> onWeight(CanAddProduct n) {
         getContext().getLog().info("WeightSensor received {}", n.weight);
 
-        if (currentWeightLoad + n.weight <= maxWeightLoad) {
+        if (n.currentWeight + n.weight <= maxWeightLoad) {
             fridge.tell(new Fridge.AnswerFromWeightSensor(true));
         } else {
             fridge.tell(new Fridge.AnswerFromWeightSensor(false));
         }
-        return this;
-    }
-
-    private Behavior<WeightSensorCommand> onProductsConsumed(ProductsConsumed n) {
-        getContext().getLog().info("WeightSensor received {}", n.weightLoad);
-
-        currentWeightLoad = n.weightLoad;
-
         return this;
     }
 

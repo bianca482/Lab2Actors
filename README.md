@@ -6,6 +6,8 @@ jeweiligen Actors und deren Interaktionsmuster mit den anderen Actors des System
 Anschließend folgt die Vorstellung der verwendeten Domänenobjekten, sowie eine Nutzungsanleitung
 inklusive beispielhafte Testfälle.
 
+Github Repo ist verfügbar unter: https://github.com/bianca482/Lab2Actors
+
 ## 1. Architektur
 Die im Projekt verwendete Architektur beruht auf den auf der Akka-Homepage beschriebenen Vorgehensweise.
 Dabei hat jeder Actor ein bestimmtes Verhalten, welches durch Commands beschrieben wird. Ein Actor

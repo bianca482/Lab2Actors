@@ -14,22 +14,14 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
     // Prüft, ob genug Platz für die gewünschte Bestellung ist
     public static final class CanAddProduct implements SpaceSensorCommand {
         int amount;
+        int currentAmount;
 
-        public CanAddProduct(int amount) {
+        public CanAddProduct(int amount, int currentAmount) {
             this.amount = amount;
+            this.currentAmount = currentAmount;
         }
     }
 
-    // Passt die aktuelle Anzahl an Produkten an
-    public static final class ProductsConsumed implements SpaceSensorCommand {
-        int amount;
-
-        public ProductsConsumed(int amount) {
-            this.amount = amount;
-        }
-    }
-
-    private int currentNumberOfProducts;
     private final int maxNumberOfProducts;
     private final ActorRef<Fridge.FridgeCommand> fridge;
 
@@ -49,7 +41,6 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
     public Receive<SpaceSensorCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(CanAddProduct.class, this::onNumberOfProducts)
-                .onMessage(ProductsConsumed.class, this::onProductsConsumed)
                 .onSignal(PostStop.class, signal -> onPostStop())
                 .build();
     }
@@ -57,19 +48,11 @@ public class SpaceSensor extends AbstractBehavior<SpaceSensor.SpaceSensorCommand
     private Behavior<SpaceSensorCommand> onNumberOfProducts(CanAddProduct n) {
         getContext().getLog().info("SpaceSensor received {}", n.amount);
 
-        if (currentNumberOfProducts + n.amount <= maxNumberOfProducts) {
+        if (n.currentAmount + n.amount <= maxNumberOfProducts) {
             fridge.tell(new Fridge.AnswerFromSpaceSensor(true));
         } else {
             fridge.tell(new Fridge.AnswerFromSpaceSensor(false));
         }
-        return this;
-    }
-
-    private Behavior<SpaceSensorCommand> onProductsConsumed(ProductsConsumed n) {
-        getContext().getLog().info("SpaceSensor received {}", n.amount);
-
-        currentNumberOfProducts = n.amount;
-
         return this;
     }
 

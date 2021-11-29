@@ -171,9 +171,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         if (amountOfProduct - message.amount >= 0) {
             productAmountMap.put(product, amountOfProduct - message.amount);
 
-            // Sensoren informieren, dass sich die aktuelle Anzahl der Produkte bzw. das aktuelle Gewicht geändert hat
-            this.spaceSensor.tell(new SpaceSensor.ProductsConsumed(message.amount));
-            this.weightSensor.tell(new WeightSensor.ProductsConsumed(product.getWeight() * message.amount));
+            currentWeightLoad = currentWeightLoad - (message.amount * productAmountMap.get(product).longValue());
+            currentNumberOfProducts = currentNumberOfProducts - message.amount;
 
             // If a product runs out in the fridge it is automatically ordered again.
             if (productAmountMap.get(product) == 0){
@@ -204,8 +203,8 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         lastOrderedProductMessage = message;
 
         //Bei Sensoren abfragen, ob die Bestellung durchgeführt werden kann
-        this.spaceSensor.tell(new SpaceSensor.CanAddProduct(message.amount));
-        this.weightSensor.tell(new WeightSensor.CanAddProduct(message.amount * product.getWeight()));
+        this.spaceSensor.tell(new SpaceSensor.CanAddProduct(message.amount, currentNumberOfProducts));
+        this.weightSensor.tell(new WeightSensor.CanAddProduct(message.amount * product.getWeight(), currentWeightLoad));
 
         return this;
     }
@@ -214,6 +213,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         getContext().getLog().info("Fridge received AnswerFromSpaceSensor. Was successful: {}", message.wasSuccessful);
 
         this.answerFromSpaceSensor = message.wasSuccessful;
+
+        if (!message.wasSuccessful) {
+            getContext().getLog().info("Cannot order {} because there is not enough room in the fridge", lastOrderedProductMessage.productToOrder);
+        }
+
         onWeightAndSpaceResponse();
         return this;
     }
@@ -222,6 +226,11 @@ public class Fridge extends AbstractBehavior<Fridge.FridgeCommand> {
         getContext().getLog().info("Fridge received AnswerFromWeightSensor. Was successful: {}", message.wasSuccessful);
 
         this.answerFromWeightSensor = message.wasSuccessful;
+
+        if (!message.wasSuccessful) {
+            getContext().getLog().info("Cannot complete order because the weight would exceed the allowed maximum weight of the fridge");
+        }
+
         onWeightAndSpaceResponse();
         return this;
     }
