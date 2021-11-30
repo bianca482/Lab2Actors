@@ -137,7 +137,9 @@ den beiden Sensoren angefragt, ob vom Gewicht bzw. von der Anzahl der Produkten
 her die Bestellung durchgeführt werden kann. Der *Fridge* wartet, bis beide Sensoren
 geprüft haben, ob die Bestellung von ihrer Seite aus durchgeführt werden kann.
 Ist die Bestellung möglich, wird ein "Per session child Actor" namens *OrderProcessor* 
-erstellt, welcher die Bestellung abschließt. 
+erstellt, welcher die Bestellung abschließt.
+Falls ein gerade konsumiertes Produkt das letzte seiner Art war, bestellt der *OrderProcessor* dieses Produkt gleich nach.
+Auch in diesem Fall prüfen zunächst die Sensoren, ob die Bestellung durchgeführt werden kann.
 
 #### 2.9.1 WeightSensor und SpaceSensor
 Beide Sensoren bekommen jeweils einen Request vom *Fridge*, bearbeiten die Anfrage und 
