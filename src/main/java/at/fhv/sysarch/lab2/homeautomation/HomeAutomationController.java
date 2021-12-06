@@ -37,8 +37,8 @@ public class HomeAutomationController extends AbstractBehavior<Void> {
         this.weatherSensor = getContext().spawn(WeatherSensor.create(this.blinds, "3", "1"), "WeatherSensor");
         this.mediaStation = getContext().spawn(MediaStation.create(this.blinds, "4", "1"), "MediaStation");
         this.fridge = getContext().spawn(Fridge.create(100, 100, "5", "1"), "Fridge");
-        //this.weatherSimulator = getContext().spawn(WeatherSimulator.create(this.weatherSensor), "WeatherSimulator");
-        //this.temperatureSimulator = getContext().spawn(TemperatureSimulator.create(this.tempSensor), "TemperatureSimulator");
+        this.weatherSimulator = getContext().spawn(WeatherSimulator.create(this.weatherSensor), "WeatherSimulator");
+        this.temperatureSimulator = getContext().spawn(TemperatureSimulator.create(this.tempSensor), "TemperatureSimulator");
         this.ui = getContext().spawn(UI.create(this.tempSensor, this.airCondition, this.weatherSensor, this.mediaStation, this.fridge), "UI");
 
         //Tell UI Actor it should start the command line
